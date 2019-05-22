@@ -1,1 +1,2 @@
-# How to test resiliency of microservices?
+# How to build resilient microservices?
+
