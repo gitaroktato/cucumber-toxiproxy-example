@@ -1,2 +1,1 @@
-# availability-testing
-How to test availability for microservices
+# How to test resiliency of microservices?
