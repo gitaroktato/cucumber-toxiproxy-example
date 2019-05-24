@@ -6,7 +6,7 @@ app.get('/getData', function (req, res) {
     // get from cache
     redisClient.hgetall("u-12345abde234", function (err, user) {
       if (user) {
-        console.dir("Loaded from REDIS - " + JSON.stringify(user));
+        console.log("Loaded from REDIS - %o", user);
         res.set('Access-Control-Allow-Origin', '*');
         res.end( JSON.stringify(user));
       } else {
@@ -14,7 +14,7 @@ app.get('/getData', function (req, res) {
         var getUser = "SELECT * FROM users.user WHERE id='u-12345abde234'";
         con.query(getUser, function (err, result) {
           if (err) throw err;
-          console.dir("Loaded from MySQL - " + JSON.stringify(result));
+          console.log("Loaded from MySQL - %o", result);
           // Write to redis
           user = result[0];
           redisClient.hmset(user.id, user);
@@ -64,7 +64,6 @@ var redis = require("redis"),
 redisClient = redis.createClient(config.redis.port, config.redis.host);
 
 redisClient.on("error", function (err) {
-    console.log("Error " + err);
     throw err;
 });
 
