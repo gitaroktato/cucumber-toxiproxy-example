@@ -8,3 +8,7 @@ services:
     image: "redis:alpine"
     ports:
       - "6379:6379"
+  mysql:
+    image: "mysql:alpine"
+    ports:
+      - "3306:3306"

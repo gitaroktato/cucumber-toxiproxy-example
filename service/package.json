@@ -8,5 +8,9 @@
     "start": "node ./index.js"
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "mysql": "^2.17.1",
+    "redis": "^2.8.0"
+  }
 }

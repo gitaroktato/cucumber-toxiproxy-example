@@ -3,6 +3,11 @@
 # Requirements
 ## Local / Staging
 - Easily reproducing it locally only with Docker
+- Able to integrate with our container orchestrators
+
+## Integration points
+caching -> DB
+aggregate service (BFF) -> service or defaults
 
 # Executing manually
 Create proxy
