@@ -4,10 +4,15 @@ services:
     image: "shopify/toxiproxy"
     ports:
        - "8474:8474"
-  redis:
+  redis-master:
     image: "redis:alpine"
     ports:
       - "6379:6379"
+  redis-slave:
+    image: "redis:alpine"
+    ports:
+      - "16379:6379"
+    command: redis-server --slaveof redis-master 6379
   mysql:
     image: mysql:5.6
     ports:

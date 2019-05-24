@@ -1,9 +1,11 @@
 # How to build resilient microservices?
 
-# Requirements
+# Goal
 ## Local / Staging
 - Easily reproducing it locally only with Docker
 - Able to integrate with our container orchestrators
+- Living documentation of failure scenarios for every service that helps team to understand failure modes
+- Better control and design for failure modes
 
 ## Integration points
 caching -> DB
@@ -21,7 +23,14 @@ Connect to the proxy with `redis-cli`
 docker-compose exec redis redis-cli -h toxiproxy
 ```
 
+# Conclusion
+This method allows fine-grained failure scenarios that are clear for everyone. Assumptions made locally can be verified with another environment by reconfiguring ToxyiProxy to see if they still stand.
+
+# Disclaimer
+Node.js code should not serve as an example on how to write clean code in this language.
+
 # References
 https://www.gremlin.com/chaos-monkey/chaos-monkey-alternatives/
 https://github.com/shopify/toxiproxy#clients
 https://github.com/trekawek/toxiproxy-java
+https://cucumber.io/docs/guides/10-minute-tutorial/
