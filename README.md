@@ -7,6 +7,11 @@
 - Living documentation of failure scenarios for every service that helps team to understand failure modes
 - Better control and design for failure modes
 
+# Test lifecycle
+1. start service in docker
+1. Execute Cucumber tests
+1. Teardown
+
 ## Integration points
 caching -> DB
 aggregate service (BFF) -> service or defaults
