@@ -7,3 +7,4 @@
 [ ] default when everything is down
 [ ] aggregate service
 [ ] staging with Kubernetes
+[ ] fix startup time

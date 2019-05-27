@@ -10,7 +10,7 @@
           "host": "192.168.99.100",
           "port": 6379
         },
-        "initSql": true
+        "initSql": false
     },
     "staging": {
         "config_id": "staging",
