@@ -13,7 +13,6 @@
   "dependencies": {
     "cucumber": "^5.1.0",
     "express": "^4.16.4",
-    "lint": "^1.1.2",
     "lodash": "^4.17.11",
     "mysql": "^2.16.0",
     "redis": "^2.8.0",
