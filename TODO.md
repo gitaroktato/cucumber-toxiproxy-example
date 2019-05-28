@@ -1,6 +1,6 @@
 [ ] layering - https://blog.risingstack.com/node-hero-node-js-project-structure-tutorial/
 [ ] domain
-[ ] install from SQL
+[ ] install from SQL file not hardcoded inline SQL
 [ ] circuit breakers
 [ ] redis read only, when mysql down
 [ ] redis read only, when redis master down
@@ -8,3 +8,4 @@
 [ ] aggregate service
 [ ] staging with Kubernetes
 [ ] fix startup time
+[ ] Add multistage node to Dockerfile
