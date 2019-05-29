@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "cucumber-js",
+    "lint": "eslint .",
     "start": "nodemon index.js",
     "cucumber-debug": "node --nolazy --inspect-brk=5858 ./node_modules/cucumber/bin/cucumber-js"
   },
@@ -16,6 +17,10 @@
     "lodash": "^4.17.11",
     "mysql": "^2.16.0",
     "redis": "^2.8.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "toxiproxy-node-client": "^2.0.6"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0"
   }
 }
