@@ -8,32 +8,29 @@ const SERVICE_URL = 'http://localhost:8080/getData';
 const TOXIPROXY_URL = 'http://192.168.99.100:8474';
 
 
-Before( async function ()  {
+Before(function () {
   const toxiproxy = new toxiproxyClient.Toxiproxy(TOXIPROXY_URL);
+  const mySqlProxyName = "mysql"
   const MySQLProxy = {
     listen: "0.0.0.0:3306",
-    name: "mysql",
+    name: mySqlProxyName,
     upstream: "mysql:6379"
   };
-  const result = toxiproxy.createProxy(MySQLProxy)
-    .then(proxy => {
-      this.proxy = proxy;
+  return toxiproxy.getAll()
+    .then(proxies => {
+        if (proxies.mysql !== undefined) {
+          return proxies.mysql;
+        } else {
+          return toxiproxy.createProxy(MySQLProxy);
+        }
     })
-    .catch(Promise.reject);
-  await result;
+    .then(proxy => this.proxy = proxy);
 });
 
-Given('MySQL is down', async function () {
-  const toxic = new toxiproxyClient.Toxic(this.proxy, {
-    name: 'mysql_down',
-    stream: 'downstream',
-    toxicity: 1,
-    type: 'down'
+Given('MySQL is down', function () {
+  return this.proxy.update({
+    enabled: false
   });
-  const result = this.proxy.addToxic(toxic)
-    .then(console.dir)
-    .catch(Promise.reject);
-  await result;
 });
 
 
