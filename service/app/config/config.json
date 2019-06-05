@@ -12,6 +12,19 @@
         },
         "initSql": false
     },
+    "test": {
+      "config_id": "test",
+      "mysql": {
+        "host": "1.2.3.4",
+        "user": "user",
+        "password": "password"
+      },
+      "redis": {
+        "host": "1.2.3.4",
+        "port": 6379
+      },
+      "initSql": false
+  },
     "staging": {
         "config_id": "staging",
         "mysql": {

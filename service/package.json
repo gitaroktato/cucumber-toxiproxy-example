@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cucumber-js",
+    "cucumber-test": "cucumber-js",
+    "test": "mocha",
     "lint": "eslint .",
     "start": "nodemon index.js",
     "cucumber-debug": "node --nolazy --inspect-brk=5858 ./node_modules/cucumber/bin/cucumber-js"
@@ -21,6 +22,9 @@
     "toxiproxy-node-client": "^2.0.6"
   },
   "devDependencies": {
-    "eslint": "^5.16.0"
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "eslint": "^5.16.0",
+    "mocha": "^6.1.4"
   }
 }
