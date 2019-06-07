@@ -3,7 +3,8 @@
         "browser": false,
         "commonjs": true,
         "es6": true,
-        "node": true
+        "node": true,
+        "mocha": true
     },
     "extends": "eslint:recommended",
     "globals": {
@@ -15,6 +16,7 @@
     },
     "rules": {
         "no-console": "off",
-        "no-warning-comments": 1
+        "no-warning-comments": "error",
+        "semi": "error"
     }
 }

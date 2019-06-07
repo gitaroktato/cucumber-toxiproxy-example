@@ -33,3 +33,5 @@ function initSQL() {
     console.log("User created");
   });
 }
+
+module.exports.connection = con;

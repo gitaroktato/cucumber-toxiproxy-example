@@ -1,11 +1,10 @@
-"use strict"
-process.env.NODE_ENV = "test"
+"use strict";
+process.env.NODE_ENV = "test";
 const config = require('../app/config');
 const chai = require('chai');
-const Mocha = require('mocha');
 
-Mocha.describe('Should load config', () => {
-  Mocha.it('loads default config', function () {
+describe('Should load config', () => {
+  it('loads default config', function () {
     chai.assert.deepEqual(config, {
       config_id: 'test',
       mysql: {
