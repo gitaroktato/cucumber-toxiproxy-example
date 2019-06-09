@@ -10,7 +10,7 @@ const TOXIPROXY_URL = 'http://192.168.99.100:8474';
 
 Before(function () {
   const toxiproxy = new toxiproxyClient.Toxiproxy(TOXIPROXY_URL);
-  const mySqlProxyName = "mysql"
+  const mySqlProxyName = "mysql";
   const MySQLProxy = {
     listen: "0.0.0.0:3306",
     name: mySqlProxyName,

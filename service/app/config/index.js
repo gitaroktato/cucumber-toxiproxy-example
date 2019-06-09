@@ -1,8 +1,8 @@
-"use strict"
-// requires
+"use strict";
 const _ = require('lodash');
-var fs = require('fs');
-var path = require('path');
+const fs = require('fs');
+const path = require('path');
+const CONFIG_FILE_NAME = 'config.json';
 
 function loadConfigFile(fileName) {
   const buffer = fs.readFileSync(path.join(__dirname, fileName));
@@ -15,10 +15,26 @@ function determineEnvironmentConfig(config, environment) {
     return _.merge(defaultConfig, environmentConfig);
 }
 
-const config = loadConfigFile('config.json');
+function loadAsync(environment, callback) {
+  const configFilePath = path.join(__dirname, CONFIG_FILE_NAME);
+  fs.readFile(configFilePath, function (err, buffer) {
+    if (err) {
+      console.error(err);
+      throw err;
+    }
+    const configJson = JSON.parse(buffer);
+    const result = determineEnvironmentConfig(configJson, environment);
+    callback(result);
+  });
+}
+
+const config = loadConfigFile(CONFIG_FILE_NAME);
 const environment = process.env.NODE_ENV || 'local';
 const finalConfig = determineEnvironmentConfig(config, environment);
 // log final config
 console.log("Loaded config: %o", finalConfig);
 // Export config
-module.exports = finalConfig;
+module.exports = {
+  load: loadAsync,
+  config: finalConfig
+};

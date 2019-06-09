@@ -1,4 +1,4 @@
-const config = require("../config");
+const config = require("../config").config;
 const redis = require("redis"),
 redisClient = redis.createClient(config.redis.port, config.redis.host);
 

@@ -1,5 +1,5 @@
-"use strict"
-const config = require('../config');
+"use strict";
+const config = require('../config').config;
 const mysql = require('mysql');
 
 const con = mysql.createConnection({
