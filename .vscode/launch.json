@@ -13,19 +13,17 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Cucumber test",
-            "runtimeExecutable": "npm",
-            "windows": {
-                "runtimeExecutable": "npm.cmd"
-            },
-            "env":{
-               "NODE_PATH": "features/"
-            },
-            "runtimeArgs": [
-                "run-script",
-                "cucumber-debug"
+            "name": "Mocha Tests",
+            "program": "${workspaceFolder}/service/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "bdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceFolder}/service/test"
             ],
-            "port": 5858
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

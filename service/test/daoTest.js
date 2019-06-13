@@ -1,25 +1,24 @@
 "use strict";
 const dao = require('../app/dao');
-const dao2 = require('../app/dao/dao.js');
+const daoInternals = require('../app/dao/dao.js');
 const sinon = require('sinon');
+const chai = require('chai');
+var conn;
 
 beforeEach(() => {
-  // Restore the default sandbox here
-  sinon.restore();
+  conn = {
+    query: sinon.stub()
+  };
 });
 
 
 describe('Initalizing tables', () => {
-  it('should init tables, when requested', (done) => {
-      const stubQuery = sinon.stub();
-      stubQuery.callsArg(1);
+  it('should init tables, when requested', (done) => {     
+      conn.query.callsArg(1);
       // stubQuery.onCall(0).callsArg(1);
       // stubQuery.onCall(1).throws();
-      const conn = {
-        query: stubQuery
-      };
       dao.initTables(conn, () => {
-        conn.query.calledWith('CREATE DATABASE users');
+        chai.assert(conn.query.calledWith('CREATE DATABASE users'));
         done();
       });
   });
@@ -27,17 +26,23 @@ describe('Initalizing tables', () => {
 
 describe('Multiple SQL command', () => {
   it('should call multiple SQL commands', (done) => {
-      const stubQuery = sinon.stub();
-      stubQuery.callsArg(1);
-      const conn = {
-        query: stubQuery
-      };
+      conn.query.callsArg(1);
       let onFinished = () => {
-        conn.query.calledWith('ONE');
-        conn.query.calledWith('TWO');
+        chai.assert(conn.query.calledWith('ONE'));
+        chai.assert(conn.query.calledWith('TWO'));
         done();
       };
-      dao2.multipleSqlCommands(conn, onFinished, "ONE", "TWO");
+      daoInternals.multipleSqlCommands(conn, onFinished, "ONE", "TWO");
+  });
+  it('should throw first error', () => {
+    conn.query.onFirstCall().callsArg(1);
+    conn.query.onSecondCall().callsArgWith(1, new Error('Connection closed'));
+    chai.assert.throws(() => {
+        daoInternals.multipleSqlCommands(conn, () => {}, "ONE", "TWO", "THREE");
+      },
+      'Connection closed' 
+    );
+    chai.assert(conn.query.calledWith('ONE'));
   });
 });
 

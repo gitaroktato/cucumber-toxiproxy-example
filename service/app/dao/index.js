@@ -1,20 +1,6 @@
 "use strict";
 const mysql = require("mysql");
 
-function multipleSqlCommands(conn, onFinished, ...args) {
-  let sqlCommand = () => {
-    let command = args.pop();
-    conn.query(command, (error) => {
-      if (error) throw error;
-      if (args.length === 0) {
-        onFinished();
-      }
-      sqlCommand();
-    });
-  };
-  sqlCommand(args.pop(), sqlCommand);
-}
-
 function initTables(conn, onInitFinished) {
   const createDb = "CREATE DATABASE users";
   conn.query(createDb, function (err) {
