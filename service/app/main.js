@@ -6,30 +6,40 @@ const redisClient = require("./cache");
 const app = express();
 
 app.get('/getData', function (req, res) {
+    const userId = "u-12345abde234";
     // get from cache
-    redisClient.hgetall("u-12345abde234", function (err, user) {
+    redisClient.hgetall(userId, function (err, user) {
+      if (err) throw err;
       if (user) {
         console.log("Loaded from REDIS - %o", user);
-        res.set('Access-Control-Allow-Origin', '*');
-        res.end( JSON.stringify(user));
+        const userAsString = JSON.stringify(user);
+        res.end(userAsString);
       } else {
-        // get from MySQL
-        var getUser = "SELECT * FROM users.user WHERE id='u-12345abde234'";
-        dao.connection.query(getUser, function (err, result) {
-          if (err) throw err;
-          console.log("Loaded from MySQL - %o", result);
-          // Write to redis
-          user = result[0];
+        dao.getUser(userId, user => {
           redisClient.hmset(user.id, user);
-          res.set('Access-Control-Allow-Origin', '*');
-          res.end( JSON.stringify(user));
+          const userAsString = JSON.stringify(user);
+          res.end(userAsString);
         });
       }
     });
 });
 
-var server = app.listen(8080, function () {
-   var host = server.address().address;
-   var port = server.address().port;
-   console.log("Server listening at http://%s:%s", host, port);
+const env = process.env.NODE_ENV || 'local';
+config.load(env, (config) => {
+  dao.connect(config, () => {
+    let startServer = () => {
+      const server = app.listen(8080, () => {
+        const host = server.address().address;
+        const port = server.address().port;
+        console.log("Server listening at http://%s:%s", host, port);
+      });
+    };
+    if (config.initSql === true) {
+      dao.initTables(startServer);
+    } else {
+      startServer();
+    }
+  });
 });
+
+

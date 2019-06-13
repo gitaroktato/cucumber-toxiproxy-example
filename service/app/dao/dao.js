@@ -2,17 +2,20 @@
 const mysql = require("mysql");
 
 function multipleSqlCommands(conn, onFinished, ...args) {
+  let currentIndex = 0;
   let sqlCommand = () => {
-    let command = args.pop();
+    let command = args[currentIndex];
     conn.query(command, (error) => {
       if (error) throw error;
-      if (args.length === 0) {
+      if (currentIndex === args.length) {
         onFinished();
+      } else {
+        currentIndex++;
+        sqlCommand();
       }
-      sqlCommand();
     });
   };
-  sqlCommand(args.pop(), sqlCommand);
+  sqlCommand();
 }
 
 function initTables(conn, onInitFinished) {
@@ -58,5 +61,6 @@ function connect(config, onConnected) {
 module.exports = {
   connect: connect,
   initTables: initTables,
-  getUser: getUser
+  getUser: getUser,
+  multipleSqlCommands: multipleSqlCommands
 };

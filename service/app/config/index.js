@@ -24,6 +24,7 @@ function loadAsync(environment, callback) {
     }
     const configJson = JSON.parse(buffer);
     const result = determineEnvironmentConfig(configJson, environment);
+    console.log("Loaded config: %o", result);
     callback(result);
   });
 }
