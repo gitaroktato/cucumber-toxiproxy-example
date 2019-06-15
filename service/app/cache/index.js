@@ -1,9 +1,5 @@
-const config = require("../config").config;
-const redis = require("redis"),
-redisClient = redis.createClient(config.redis.port, config.redis.host);
+const cache = require("./cache");
 
-redisClient.on("error", function (err) {
-    throw err;
-});
-
-module.exports = redisClient;
+module.exports = {
+    connect: cache.connect
+};

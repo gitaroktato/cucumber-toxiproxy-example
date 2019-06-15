@@ -16,7 +16,7 @@
     },
     "rules": {
         "no-console": "off",
-        "no-warning-comments": "error",
+        "no-warning-comments": "warn",
         "semi": "error"
     }
 }

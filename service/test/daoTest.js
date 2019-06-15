@@ -15,10 +15,10 @@ beforeEach(() => {
 describe('Initalizing tables', () => {
   it('should init tables, when requested', (done) => {     
       conn.query.callsArg(1);
-      // stubQuery.onCall(0).callsArg(1);
-      // stubQuery.onCall(1).throws();
       dao.initTables(conn, () => {
         chai.assert(conn.query.calledWith('CREATE DATABASE users'));
+        chai.assert(conn.query.calledWithMatch(/CREATE TABLE users.user/));
+        chai.assert(conn.query.calledWithMatch(/INSERT INTO users.user/));
         done();
       });
   });
