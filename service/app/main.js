@@ -7,21 +7,21 @@ const app = express();
 var cacheClient;
 var daoConnection;
 
-app.get('/getData', function (req, res) {
-    const userId = "u-12345abde234";
+app.get('/users/:userId', function (req, res) {
+    const userId = req.params.userId;
     // get from cache
-    cacheClient.hgetall(userId, function (err, user) {
+    cache.getUser(cacheClient, userId, (err, user) => {
       if (err) throw err;
       if (user) {
         console.log("Loaded from REDIS - %o", user);
-        const userAsString = JSON.stringify(user);
-        res.end(userAsString);
+        res.json(user);
       } else {
-        dao.getUser(daoConnection, userId, user => {
+        // get from database
+        dao.getUser(daoConnection, userId, (err, user) => {
+          if (err) throw err;
           console.log("Loaded from MySQL - %o", user);
-          cacheClient.hmset(user.id, user);
-          const userAsString = JSON.stringify(user);
-          res.end(userAsString);
+          cache.storeUser(cacheClient, user);
+          res.json(user);
         });
       }
     });

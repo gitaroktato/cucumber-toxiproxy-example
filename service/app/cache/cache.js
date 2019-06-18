@@ -11,6 +11,18 @@ function connect(properties, onConnected) {
   });
 }
 
+function getUser(client, userId, onFinished) {
+  client.hgetall(userId, function (err, user) {
+    onFinished(err, user);
+  });
+}
+
+function storeUser(client, user) {
+  client.hmset(user.id, user);
+}
+
 module.exports = {
-  connect: connect
+  connect: connect,
+  getUser: getUser,
+  storeUser: storeUser
 };

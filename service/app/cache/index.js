@@ -1,5 +1,7 @@
 const cache = require("./cache");
 
 module.exports = {
-    connect: cache.connect
+    connect: cache.connect,
+    getUser: cache.getUser,
+    storeUser: cache.storeUser
 };

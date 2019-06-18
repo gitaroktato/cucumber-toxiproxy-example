@@ -31,13 +31,12 @@ function initTables(conn, onInitFinished) {
     "INSERT INTO users.user VALUES ('u-12345abde234', 'Bob')");
 }
 
-// TODO return error?
 function getUser(conn, id, onUserLoaded) {
   const query = "SELECT * FROM users.user WHERE id = ?";
   conn.query(query, id, (err, result) => {
-    if (err) throw err;
+    if (err) onUserLoaded(err, null);
     const user = result[0];
-    onUserLoaded(user);
+    onUserLoaded(null, user);
   });
 }
 
