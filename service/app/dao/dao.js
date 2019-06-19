@@ -43,6 +43,7 @@ function getUser(conn, id, onUserLoaded) {
 function connect(properties, onConnected) {
   const connection = mysql.createConnection({
     host: properties.host,
+    port: properties.port,
     user: properties.user,
     password: properties.password
   });

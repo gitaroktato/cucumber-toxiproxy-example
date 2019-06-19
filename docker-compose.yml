@@ -4,6 +4,7 @@ services:
     image: "shopify/toxiproxy"
     ports:
        - "8474:8474"
+       - "13306:3306"
   redis-master:
     image: "redis:alpine"
     ports:

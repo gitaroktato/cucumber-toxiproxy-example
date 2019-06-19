@@ -1,11 +1,13 @@
 "use strict";
 const request = require('request');
 const assert = require('assert');
-const { Before, Given, When, Then } = require('cucumber');
+const { Before, After, Given, When, Then } = require('cucumber');
 const toxiproxyClient = require("toxiproxy-node-client");
 // TODO to configuration
 const SERVICE_URL = 'http://localhost:8080';
 const TOXIPROXY_URL = 'http://192.168.99.100:8474';
+
+// TODO start service with proxy mode
 
 
 Before(function () {
@@ -14,23 +16,30 @@ Before(function () {
   const MySQLProxy = {
     listen: "0.0.0.0:3306",
     name: mySqlProxyName,
-    upstream: "mysql:6379"
+    upstream: "mysql:3306"
   };
   return toxiproxy.getAll()
     .then(proxies => {
-        if (proxies.mysql !== undefined) {
-          return proxies.mysql;
-        } else {
-          return toxiproxy.createProxy(MySQLProxy);
-        }
+      if (proxies.mysql !== undefined) {
+        return proxies.mysql;
+      } else {
+        return toxiproxy.createProxy(MySQLProxy);
+      }
     })
     .then(proxy => this.proxy = proxy);
 });
 
+After(function () {
+  // return this.proxy.remove();
+});
+
 Given('MySQL is down', function () {
-  return this.proxy.update({
-    enabled: false
-  });
+  // const toxicBody = {
+  //   attributes: {timeout: 5000},
+  //   type: 'timeout'
+  // };
+  // const toxic = new toxiproxyClient.Toxic(this.proxy, toxicBody);
+  // return this.proxy.addToxic(this.proxy, toxic);
 });
 
 

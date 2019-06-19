@@ -1,4 +1,4 @@
-[ ] layering - https://blog.risingstack.com/node-hero-node-js-project-structure-tutorial/
+[/] layering - https://blog.risingstack.com/node-hero-node-js-project-structure-tutorial/
 [ ] domain
 [ ] install from SQL file not hardcoded inline SQL
 [ ] circuit breakers
