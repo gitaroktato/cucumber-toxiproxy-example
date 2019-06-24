@@ -39,7 +39,7 @@ function getUser(conn, id, onUserLoaded) {
     onUserLoaded(null, user);
   });
 }
-
+// TODO destructuring?
 function connect(properties, onConnected) {
   const connection = mysql.createConnection({
     host: properties.host,

@@ -5,8 +5,10 @@
 [ ] redis read only, when mysql down
 [ ] redis read only, when redis master down
 [ ] return some defaults when everything is down
+[ ] Add multistage node to Dockerfile
+
+# Part 2
 [ ] aggregate service
 [ ] staging with Kubernetes
-[ ] fix startup time
-[ ] Add multistage node to Dockerfile
 [ ] How do we deal with startup? Without MySQL but with Redis?
+[ ] fix startup time

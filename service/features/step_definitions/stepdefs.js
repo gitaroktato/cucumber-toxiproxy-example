@@ -2,54 +2,63 @@
 const request = require('request');
 const assert = require('assert');
 const { Before, After, Given, When, Then } = require('cucumber');
-const toxiproxyClient = require("toxiproxy-node-client");
 // TODO to configuration
 const SERVICE_URL = 'http://localhost:8080';
-const TOXIPROXY_URL = 'http://192.168.99.100:8474';
+const TOXIPROXY_URL = 'http://192.168.99.106:8474';
 
 // TODO start service with proxy mode
 
-
-Before(function () {
-  const toxiproxy = new toxiproxyClient.Toxiproxy(TOXIPROXY_URL);
-  const mySqlProxyName = "mysql";
-  const MySQLProxy = {
-    listen: "0.0.0.0:3306",
-    name: mySqlProxyName,
-    upstream: "mysql:3306"
-  };
-  return toxiproxy.getAll()
-    .then(proxies => {
-      if (proxies.mysql !== undefined) {
-        return proxies.mysql;
-      } else {
-        return toxiproxy.createProxy(MySQLProxy);
+Before(function (_, callback) {
+  request.get(`${TOXIPROXY_URL}/proxies/mysql`, { json: true }, (err, res) => {
+    if (err) return callback(err);
+    // Already created, should be OK
+    // TODO delete?
+    if (res.statusCode === 200) return callback();
+    const mySqlProxy = {
+      name: 'mysql',
+      listen: '0.0.0.0:3306',
+      upstream: 'mysql:3306',
+      enabled: true
+    };
+    request.post(`${TOXIPROXY_URL}/proxies`,
+      { json: true , body: mySqlProxy}, (err, res) => {
+      if (err) return callback(err);
+      if (res.statusCode !== 201) {
+        // Something went wrong, we quit
+        return callback(`Got status code after create: ${res.statusCode}`);
       }
-    })
-    .then(proxy => this.proxy = proxy);
+      return callback();
+    });
+  });
 });
 
-After(function () {
-  // return this.proxy.remove();
+After(function (callback) {
+  request.delete(`${TOXIPROXY_URL}/proxies/mysql`, callback);
 });
 
-Given('MySQL is down', function () {
-  // const toxicBody = {
-  //   attributes: {timeout: 5000},
-  //   type: 'timeout'
-  // };
-  // const toxic = new toxiproxyClient.Toxic(this.proxy, toxicBody);
-  // return this.proxy.addToxic(this.proxy, toxic);
+Given('MySQL is down', function (callback) {
+  const mySqlProxy = {
+    name: 'mysql',
+    enabled: false
+  };
+  request.post(`${TOXIPROXY_URL}/proxies/mysql`,
+    { json: true , body: mySqlProxy}, (err, res) => {
+    if (err) return callback(err);
+    if (res.statusCode !== 200) {
+      return callback(`Got status code after create: ${res.statusCode}`);
+    }
+    callback();
+  });
 });
 
 
 When('user {string} is requested', function (userId, callback) {
-  request(SERVICE_URL + `/users/${userId}`, { json: true }, (err, res, body) => {
+  request(SERVICE_URL + `/users/${userId}`, { json: true }, (err, _, body) => {
     if (err) {
-      callback(err);
+      return callback(err);
     }
     this.user = body;
-    callback(null, 'success');
+    callback();
   });
 });
 

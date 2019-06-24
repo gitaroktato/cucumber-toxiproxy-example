@@ -27,7 +27,7 @@ app.get('/users/:userId', function (req, res) {
     });
 });
 
-// TODO independent start?
+// TODO independent start by using a function
 let startServer = () => {
   const server = app.listen(8080, () => {
     const host = server.address().address;

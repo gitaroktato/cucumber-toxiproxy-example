@@ -1,6 +1,7 @@
 "use strict";
 const redis = require("redis");
 
+// TODO destructuring?
 function connect(properties, onConnected) {
   const client = redis.createClient(properties.port, properties.host);
   client.on("error", function (err) {
