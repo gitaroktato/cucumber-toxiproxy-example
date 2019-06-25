@@ -17,6 +17,7 @@
     "rules": {
         "no-console": "off",
         "no-warning-comments": "warn",
-        "semi": "error"
+        "semi": "error",
+        "callback-return": "error"
     }
 }

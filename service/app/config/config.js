@@ -5,7 +5,7 @@ const path = require('path');
 const CONFIG_FILE_NAME = 'config.json';
 
 function determineEnvironmentConfig(config, environment) {
-    const defaultConfig = config.local;
+    const defaultConfig = config.default;
     const environmentConfig = config[environment];
     return _.merge(defaultConfig, environmentConfig);
 }
