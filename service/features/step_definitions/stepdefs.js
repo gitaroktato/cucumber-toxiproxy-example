@@ -1,18 +1,16 @@
 "use strict";
 const request = require('request');
 const assert = require('assert');
-const { Before, After, Given, When, Then } = require('cucumber');
+// const app = require('../../app/main.js');
+const { BeforeAll, AfterAll, Given, When, Then } = require('cucumber');
 // TODO to configuration
 const SERVICE_URL = 'http://localhost:8080';
 const TOXIPROXY_URL = 'http://192.168.99.106:8474';
 
-// TODO start service with proxy mode
-
-Before(function (_, callback) {
+BeforeAll(function (callback) {
   request.get(`${TOXIPROXY_URL}/proxies/mysql`, { json: true }, (err, res) => {
     if (err) return callback(err);
     // Already created, should be OK
-    // TODO delete?
     if (res.statusCode === 200) return callback();
     const mySqlProxy = {
       name: 'mysql',
@@ -27,13 +25,17 @@ Before(function (_, callback) {
         // Something went wrong, we quit
         return callback(`Got status code after create: ${res.statusCode}`);
       }
-      return callback();
+      console.debug("Proxy created", res.body);
+      callback();
     });
   });
 });
 
-After(function (callback) {
-  request.delete(`${TOXIPROXY_URL}/proxies/mysql`, callback);
+AfterAll(function () {
+  // TODO app shutdown
+  // request.delete(`${TOXIPROXY_URL}/proxies/mysql`, () => {
+  //   return Promise.resolve();
+  // });
 });
 
 Given('MySQL is down', function (callback) {
@@ -47,10 +49,10 @@ Given('MySQL is down', function (callback) {
     if (res.statusCode !== 200) {
       return callback(`Got status code after create: ${res.statusCode}`);
     }
+    console.log("Proxy disabled %o", res.body);
     callback();
   });
 });
-
 
 When('user {string} is requested', function (userId, callback) {
   request(SERVICE_URL + `/users/${userId}`, { json: true }, (err, _, body) => {

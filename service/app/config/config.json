@@ -1,19 +1,29 @@
 {
+    "default": {
+      "config_id": "default",
+      "mysql": {
+        "host": "192.168.99.106",
+        "port": 3306,
+        "user": "root",
+        "password": "letmein"
+      },
+      "redis": {
+        "host": "192.168.99.106",
+        "port": 6379
+      }
+    },
     "local": {
         "config_id": "local",
-        "mysql": {
-          "host": "192.168.99.106",
-          "port": 13306,
-          "user": "root",
-          "password": "letmein"
-        },
-        "redis": {
-          "host": "192.168.99.106",
-          "port": 6379
-        },
-        "initSql": true
+        "initSql": false
     },
-    "test": {
+    "cucumber": {
+        "config_id": "cucumber",
+        "mysql": {
+          "port": 13306
+        },
+        "initSql": false
+    },
+    "config-test": {
       "config_id": "test",
       "mysql": {
         "host": "1.2.3.4",
@@ -25,17 +35,5 @@
         "port": 6379
       },
       "initSql": false
-  },
-    "staging": {
-        "config_id": "staging",
-        "mysql": {
-          "host": "app-cluster.cluster-csiol9yc7ck1.us-east-1.rds.amazonaws.com",
-          "user": "root",
-          "password": "pa$$word"
-        },
-        "redis": {
-          "host": "master.redis.pjratd.use1.cache.amazonaws.com",
-          "port": 6379
-        }
     }
 }

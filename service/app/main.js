@@ -28,39 +28,41 @@ app.get('/users/:userId', function (req, res) {
 });
 
 // TODO independent start by using a function
-let startServer = () => {
+function startServer (callback) {
   const server = app.listen(8080, () => {
     const host = server.address().address;
     const port = server.address().port;
     console.log("Server listening at http://%s:%s", host, port);
+    callback();
   });
-};
+}
 
-let startCache = (config) => {
+function startCache (config, callback) {
   cache.connect(config.redis, (error, client) => {
     if (error) throw error;
     cacheClient = client;
-    startServer();
+    startServer(callback);
   });
-};
+}
 
-let startDao = (config) => {
+function startDao (config, callback) {
   dao.connect(config.mysql, (error, connection) => {
     if (error) throw error;
     daoConnection = connection;
     if (config.initSql === true) {
       dao.initTables(connection, () => {
-        startCache(config);
+        startCache(config, callback);
       });
     } else {
-      startCache(config);
+      startCache(config, callback);
     }
   });
+}
+
+module.exports = {
+  start: function (env, onCompleted) {
+    config.load(env, (config) => {
+      startDao(config, onCompleted);  
+    });
+  }
 };
-
-const env = process.env.NODE_ENV || 'local';
-config.load(env, (config) => {
-  startDao(config);  
-});
-
-

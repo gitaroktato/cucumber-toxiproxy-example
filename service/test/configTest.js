@@ -10,7 +10,8 @@ describe('Asynchronous config usage', () => {
       mysql: {
         host: "1.2.3.4",
         user: "user",
-        password: "password"
+        password: "password",
+        port: 3306
       },
       redis: {
         host: "1.2.3.4",
@@ -18,7 +19,7 @@ describe('Asynchronous config usage', () => {
       },
       initSql: false
     };
-    config.load('test', result => {
+    config.load('config-test', result => {
       chai.assert.deepEqual(result, expected);
       done();
     });

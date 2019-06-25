@@ -19,11 +19,12 @@
     "redis": "^2.8.0"
   },
   "devDependencies": {
-    "request": "^2.88.0",
-    "cucumber": "^5.1.0",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
+    "cucumber": "^5.1.0",
     "eslint": "^5.16.0",
-    "mocha": "^6.1.4"
+    "mocha": "^6.1.4",
+    "request": "^2.88.0",
+    "sinon": "^7.3.2"
   }
 }
