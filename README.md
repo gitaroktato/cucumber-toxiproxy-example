@@ -28,8 +28,9 @@ Connect to the proxy with `redis-cli`
 docker-compose exec redis redis-cli -h toxiproxy
 ```
 
-# Test design
-- Don't run the service and the tests in the same process.
+# Draft
+- Don't run the service and the tests in the same process
+- Benefits of testing with the whole network stack
 
 # Conclusion
 This method allows fine-grained failure scenarios that are clear for everyone. Assumptions made locally can be verified with another environment by reconfiguring ToxyiProxy to see if they still stand.
