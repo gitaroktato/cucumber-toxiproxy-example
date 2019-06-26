@@ -10,18 +10,17 @@
       "redis": {
         "host": "192.168.99.106",
         "port": 6379
-      }
+      },
+      "initSql": false
     },
     "local": {
-        "config_id": "local",
-        "initSql": false
+        "config_id": "local"
     },
-    "cucumber": {
-        "config_id": "cucumber",
+    "toxiproxy": {
+        "config_id": "toxiproxy",
         "mysql": {
           "port": 13306
-        },
-        "initSql": false
+        }
     },
     "config-test": {
       "config_id": "test",
