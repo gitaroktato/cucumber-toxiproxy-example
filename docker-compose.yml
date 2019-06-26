@@ -20,3 +20,9 @@ services:
     - "3306"
     environment:
       MYSQL_ROOT_PASSWORD: "letmein"
+    volumes:
+      - /var/lib/mysql
+  user-servce:
+    build: "app"
+    ports:
+       - "8080:8080"
