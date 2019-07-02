@@ -32,14 +32,23 @@ When('user {string} is requested', function (userId, callback) {
   });
 });
 
-When('new user created with id ... and name ...', function () {
-  // Write code here that turns the phrase above into concrete actions
-  return 'pending';
+When('new user created with id {string} and name {string}', function (userId, name, callback) {
+  const user = {
+    name: name,
+    id: userId
+  };
+  request.put(SERVICE_URL + `/users/${userId}`, { json: true, body: user }, (err, res) => {
+    if (err) {
+      return callback(err);
+    }
+    console.log(res.statusCode);
+    this.statusCode = res.statusCode;
+    callback();
+  });
 });
 
-Then('HTTP {int} is returned', function (int) {
-  // Write code here that turns the phrase above into concrete actions
-  return 'pending';
+Then('HTTP {int} is returned', function (statusCode) {
+  assert.equal(this.statusCode, statusCode);
 });
 
 Then('the user is returned from Redis', function () {
