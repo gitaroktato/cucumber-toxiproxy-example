@@ -2,14 +2,14 @@
 const mysql = require("mysql");
 
 // TODO maybe return the error as argument instead of throw?
-function multipleSqlCommands(conn, onFinished, ...args) {
+function multipleSqlCommands(conn, callback, ...args) {
   let currentIndex = 0;
   let sqlCommand = () => {
     let command = args[currentIndex];
     conn.query(command, (error) => {
       if (error) throw error;
       if (currentIndex === args.length - 1) {
-        onFinished();
+        return callback();
       } else {
         currentIndex++;
         sqlCommand();
@@ -19,10 +19,10 @@ function multipleSqlCommands(conn, onFinished, ...args) {
   sqlCommand();
 }
 
-function initTables(conn, onInitFinished) {
+function initTables(conn, callback) {
   const onFinished = () => {
     console.log("Database initialized");
-    onInitFinished();
+    return callback();
   };
   multipleSqlCommands(conn,
     onFinished,
@@ -31,30 +31,42 @@ function initTables(conn, onInitFinished) {
     "INSERT INTO users.user VALUES ('u-12345abde234', 'Bob')");
 }
 
-function getUser(conn, id, onUserLoaded) {
+function getUser(conn, id, callback) {
   const query = "SELECT * FROM users.user WHERE id = ?";
   conn.query(query, id, (err, result) => {
-    if (err) onUserLoaded(err, null);
+    if (err) {
+      return callback(err, null);
+    }
     const user = result[0];
-    onUserLoaded(null, user);
+    callback(null, user);
   });
 }
+
+function saveUser(conn, user, callback) {
+  const query = "INSERT INTO users.user (id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?";
+  conn.query(query, user.id, user.name, user.name, (err) => {
+    if (err) {
+      return callback(err);
+    }
+    callback();
+  });
+}
+
 // TODO destructuring?
-function connect(properties, onConnected) {
-  const connection = mysql.createConnection({
+function connect(properties, callback) {
+  const pool = mysql.createPool({
     host: properties.host,
     port: properties.port,
     user: properties.user,
     password: properties.password
   });
-  connection.connect((error) => {
-    onConnected(error, connection);
-  });
+  callback(null, pool);
 }
 
 module.exports = {
   connect: connect,
   initTables: initTables,
   getUser: getUser,
+  saveUser: saveUser,
   multipleSqlCommands: multipleSqlCommands
 };

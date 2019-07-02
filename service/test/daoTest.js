@@ -46,6 +46,36 @@ describe('Multiple SQL command', () => {
   });
 });
 
+describe('Querying and saving user', () => {
+  it('should query database for user', (done) => {
+    const expected = {
+      id: 'u-1234',
+      name: 'Bob'
+    };
+    conn.query.callsArgWith(2, null, [expected]);
+    dao.getUser(conn, expected.id, (err, user) => {
+      chai.assert.isNull(err);
+      chai.assert.equal(user, expected);
+      chai.assert.equal("SELECT * FROM users.user WHERE id = ?",
+        conn.query.getCall(0).args[0]);
+      done();
+    });
+  });
+  it('should update user', (done) => {
+    const expected = {
+      id: 'u-1234',
+      name: 'Bob'
+    };
+    conn.query.callsArgWith(4, null, [expected]);
+    dao.saveUser(conn, expected, (err) => {
+      chai.assert.isNotTrue(err);
+      chai.assert.equal("INSERT INTO users.user (id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?",
+        conn.query.getCall(0).args[0]);
+      done();
+    });
+  });
+});
+
 afterEach(() => {
   // Restore the default sandbox here
   sinon.restore();

@@ -32,12 +32,21 @@ When('user {string} is requested', function (userId, callback) {
   });
 });
 
-When('new user created with id ... and name ...', function () {
-  // Write code here that turns the phrase above into concrete actions
-  return 'pending';
+When('new user created with id {string} and name {string}', function (userId, name, callback) {
+  const user = {
+    name: name,
+    userId: userId
+  };
+  request.put(SERVICE_URL + `/users/${userId}`, { json: true, body: user }, (err, _, body) => {
+    if (err) {
+      return callback(err);
+    }
+    this.user = body;
+    callback();
+  });
 });
 
-Then('HTTP {int} is returned', function (int) {
+Then('HTTP {int} is returned', function (errorCode) {
   // Write code here that turns the phrase above into concrete actions
   return 'pending';
 });

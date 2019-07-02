@@ -8,5 +8,5 @@ Feature: Availability for user service
 
   Scenario: Write not allowed without MySQL
     Given MySQL is down
-    When new user created with id ... and name ...
+    When new user created with id 'u-1123' and name 'Joe'
     Then HTTP 503 is returned

@@ -32,6 +32,11 @@ docker-compose exec redis redis-cli -h toxiproxy
 - Don't run the service and the tests in the same process
 - Benefits of testing with the whole network stack
 
+
+## Step 1 - Pooling MySQL
+https://www.npmjs.com/package/mysql#server-disconnects
+
+
 # Conclusion
 This method allows fine-grained failure scenarios that are clear for everyone. Assumptions made locally can be verified with another environment by reconfiguring ToxyiProxy to see if they still stand.
 
