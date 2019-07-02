@@ -35,20 +35,20 @@ When('user {string} is requested', function (userId, callback) {
 When('new user created with id {string} and name {string}', function (userId, name, callback) {
   const user = {
     name: name,
-    userId: userId
+    id: userId
   };
-  request.put(SERVICE_URL + `/users/${userId}`, { json: true, body: user }, (err, _, body) => {
+  request.put(SERVICE_URL + `/users/${userId}`, { json: true, body: user }, (err, res) => {
     if (err) {
       return callback(err);
     }
-    this.user = body;
+    console.log(res.statusCode);
+    this.statusCode = res.statusCode;
     callback();
   });
 });
 
-Then('HTTP {int} is returned', function (errorCode) {
-  // Write code here that turns the phrase above into concrete actions
-  return 'pending';
+Then('HTTP {int} is returned', function (statusCode) {
+  assert.equal(this.statusCode, statusCode);
 });
 
 Then('the user is returned from Redis', function () {

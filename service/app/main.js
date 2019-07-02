@@ -7,6 +7,8 @@ const app = express();
 var cacheClient;
 var daoConnection;
 
+app.use(express.json());
+
 app.get('/users/:userId', function (req, res) {
     const userId = req.params.userId;
     // get from cache
@@ -27,7 +29,19 @@ app.get('/users/:userId', function (req, res) {
     });
 });
 
-// TODO independent start by using a function
+app.put('/users/:userId', function (req, res) {
+  const user = req.body;
+  console.log(req.body);
+  
+  user.id = req.params.userId;
+  dao.saveUser(daoConnection, user, (err) => {
+    if (err) throw err;
+    console.log("Saved user - %o", user);
+    res.sendStatus(200);
+  });
+});
+
+// TODO independent start from each other?
 function startServer (callback) {
   const server = app.listen(8080, () => {
     const host = server.address().address;

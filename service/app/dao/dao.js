@@ -44,7 +44,7 @@ function getUser(conn, id, callback) {
 
 function saveUser(conn, user, callback) {
   const query = "INSERT INTO users.user (id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?";
-  conn.query(query, user.id, user.name, user.name, (err) => {
+  conn.query(query, [user.id, user.name, user.name], (err) => {
     if (err) {
       return callback(err);
     }
