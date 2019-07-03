@@ -1,0 +1,95 @@
+{
+	"info": {
+		"_postman_id": "496cd542-2a9c-4a1a-a65f-4ba2139cfeea",
+		"name": "user-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get toxiproxy proxies",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"type\": \"timeout\",\n\t\"attributes\": {\n\t\t\"timeout\": 5000\n\t}\n}"
+				},
+				"url": {
+					"raw": "192.168.99.106:8474/proxies/mysql",
+					"host": [
+						"192",
+						"168",
+						"99",
+						"106"
+					],
+					"port": "8474",
+					"path": [
+						"proxies",
+						"mysql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create user",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"u-123455\",\n    \"name\": \"Joe\"\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/users/u-123456",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"u-123456"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/users/u-12345abde234",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"u-12345abde234"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

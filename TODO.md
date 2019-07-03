@@ -1,11 +1,14 @@
 [/] layering - https://blog.risingstack.com/node-hero-node-js-project-structure-tutorial/
 [ ] domain
+[ ] cache expiration
 [ ] circuit breakers
-[ ] fixing connection pools
 [ ] redis read only, when mysql down
 [ ] redis read only, when redis master down
+[ ] fixing connection pools for REDIS
+[ ] mysql, when redis is down
+[ ] recovery, when Redis is back up
 [ ] return some defaults when everything is down
-[ ] install from SQL file not hardcoded inline SQL
+[ ] install from SQL file not hardcoded inline SQL (Docker?)
 
 # Part 2
 [ ] Add multistage node to Dockerfile
