@@ -6,19 +6,27 @@ const { Given, When, Then } = require('cucumber');
 const SERVICE_URL = 'http://localhost:8080';
 const TOXIPROXY_URL = 'http://192.168.99.106:8474';
 
-Given('MySQL is down', function (callback) {
+function toggleMySql(status, callback) {
   const mySqlProxy = {
     name: 'mysql',
-    enabled: false
+    enabled: status
   };
   request.post(`${TOXIPROXY_URL}/proxies/mysql`,
     { json: true , body: mySqlProxy}, (err, res) => {
     if (err) return callback(err);
     if (res.statusCode !== 200) {
-      return callback(`Got status code after create: ${res.statusCode}`);
+      return callback(`Got status code after update: ${res.statusCode}`);
     }
     callback();
   });
+}
+
+Given('MySQL is down', function (callback) {
+  toggleMySql(false, callback);
+});
+
+When('MySQL is up', function (callback) {
+  toggleMySql(true, callback);
 });
 
 When('user {string} is requested', function (userId, callback) {
@@ -49,6 +57,10 @@ Then('HTTP {int} is returned', function (statusCode) {
   assert.equal(this.statusCode, statusCode);
 });
 
-Then('the user is returned from Redis', function () {
-  assert.equal(this.user.id, 'u-12345abde234');
+Then('the user with id {string} is returned from Redis', function (userId) {
+  assert.equal(this.user.id, userId);
+});
+
+Then('the user with id {string} is returned from MySQL', function (userId) {
+  assert.equal(this.user.id, userId);
 });
