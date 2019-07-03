@@ -17,7 +17,6 @@ Given('MySQL is down', function (callback) {
     if (res.statusCode !== 200) {
       return callback(`Got status code after create: ${res.statusCode}`);
     }
-    console.debug("Proxy disabled %o", res.body);
     callback();
   });
 });
@@ -41,7 +40,6 @@ When('new user created with id {string} and name {string}', function (userId, na
     if (err) {
       return callback(err);
     }
-    console.log(res.statusCode);
     this.statusCode = res.statusCode;
     callback();
   });

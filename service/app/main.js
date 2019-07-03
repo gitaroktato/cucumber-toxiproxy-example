@@ -31,11 +31,11 @@ app.get('/users/:userId', function (req, res) {
 
 app.put('/users/:userId', function (req, res) {
   const user = req.body;
-  console.log(req.body);
-  
   user.id = req.params.userId;
   dao.saveUser(daoConnection, user, (err) => {
-    if (err) throw err;
+    if (err) {
+      return res.sendStatus(503);
+    }
     console.log("Saved user - %o", user);
     res.sendStatus(200);
   });
