@@ -6,7 +6,7 @@
 [ ] redis read only, when redis master down
 [ ] fixing connection pools for REDIS
 [ ] mysql, when redis is down
-[ ] recovery, when service is back up
+[ ] recovery, when Redis is back up
 [ ] return some defaults when everything is down
 [ ] install from SQL file not hardcoded inline SQL (Docker?)
 

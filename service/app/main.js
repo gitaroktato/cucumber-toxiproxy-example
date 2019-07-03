@@ -16,6 +16,7 @@ app.get('/users/:userId', function (req, res) {
       if (err) throw err;
       if (user) {
         console.log("Loaded from REDIS - %o", user);
+        res.set("X-Data-Source", "cache");
         res.json(user);
       } else {
         // get from database
@@ -23,6 +24,7 @@ app.get('/users/:userId', function (req, res) {
           if (err) throw err;
           console.log("Loaded from MySQL - %o", user);
           cache.storeUser(cacheClient, user);
+          res.set("X-Data-Source", "origin");
           res.json(user);
         });
       }
