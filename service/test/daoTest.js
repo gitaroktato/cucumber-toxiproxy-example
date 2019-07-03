@@ -66,7 +66,7 @@ describe('Querying and saving user', () => {
       id: 'u-1234',
       name: 'Bob'
     };
-    conn.query.callsArgWith(4, null, [expected]);
+    conn.query.callsArgWith(2, null, [expected]);
     dao.saveUser(conn, expected, (err) => {
       chai.assert.isNotTrue(err);
       chai.assert.equal("INSERT INTO users.user (id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?",

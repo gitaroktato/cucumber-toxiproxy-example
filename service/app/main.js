@@ -38,7 +38,8 @@ app.put('/users/:userId', function (req, res) {
     if (err) {
       return res.sendStatus(503);
     }
-    console.log("Saved user - %o", user);
+    console.debug("Saved user - %o", user);
+    cache.evictUser(cacheClient, user.id);
     res.sendStatus(200);
   });
 });
