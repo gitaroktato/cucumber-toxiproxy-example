@@ -12,9 +12,9 @@ function connect(properties, onConnected) {
   });
 }
 
-function getUser(client, userId, onFinished) {
+function getUser(client, userId, callback) {
   client.hgetall(userId, function (err, user) {
-    onFinished(err, user);
+    callback(err, user);
   });
 }
 
@@ -22,8 +22,13 @@ function storeUser(client, user) {
   client.hmset(user.id, user);
 }
 
+function evictUser(client, userId) {
+  client.del(userId);
+}
+
 module.exports = {
   connect: connect,
   getUser: getUser,
-  storeUser: storeUser
+  storeUser: storeUser,
+  evictUser: evictUser
 };

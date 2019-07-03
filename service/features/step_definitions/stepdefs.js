@@ -36,7 +36,6 @@ When('user {string} is requested', function (userId, callback) {
     }
     this.user = body;
     this.dataSource = res.headers['x-data-source'];
-    console.log(res.headers);
     callback();
   });
 });
