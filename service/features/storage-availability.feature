@@ -1,4 +1,4 @@
-Feature: Availability for user service
+Feature: Storage availability scenarios for user service
   User service should survive all possible failure scenarios
 
   Scenario: Read-only mode without MySQL

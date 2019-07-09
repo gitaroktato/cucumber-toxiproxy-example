@@ -13,7 +13,10 @@ app.get('/users/:userId', function (req, res) {
     const userId = req.params.userId;
     // get from cache
     cache.getUser(cacheClient, userId, (err, user) => {
-      if (err) throw err;
+      // Let's ignore error and just try to continue.. What could go wrong?
+      if (err) {
+        console.error("REDIS error - ", err);
+      }
       if (user) {
         console.log("Loaded from REDIS - %o", user);
         res.set("X-Data-Source", "cache");
@@ -21,7 +24,7 @@ app.get('/users/:userId', function (req, res) {
       } else {
         // get from database
         dao.getUser(daoConnection, userId, (err, user) => {
-          if (err) throw err;
+          // if (err) throw err;
           console.log("Loaded from MySQL - %o", user);
           cache.storeUser(cacheClient, user);
           res.set("X-Data-Source", "origin");
