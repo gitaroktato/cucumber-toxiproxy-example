@@ -2,11 +2,6 @@
 const redis = require("redis");
 
 function doRetry(options) {
-    if (options.error && options.error.code === 'ECONNREFUSED') {
-      // End reconnecting on a specific error and flush all commands with
-      // a individual error
-      throw new Error('The server refused the connection');
-    }
     if (options.total_retry_time > 1000 * 60) {
       // End reconnecting after a specific timeout and flush all commands
       // with a individual error
@@ -17,7 +12,10 @@ function doRetry(options) {
       throw new Error('Reconnection attempt exhausted');
     }
     // reconnect after
-    return Math.min(options.attempt * 100, 3000);
+    const reconnectDelay = Math.min(options.attempt * 100, 3000);
+    console.warn("REDIS - Reconnecting attempt %d, reconnect after %d ms",
+      options.attempt, reconnectDelay);
+    return reconnectDelay;
 }
 
 // TODO destructuring?
@@ -33,8 +31,11 @@ function connect(properties, onConnected) {
 }
 
 function getUser(client, userId, callback) {
+  // TODO timeout from config
+  const timer = setTimeout(callback, 200, new Error("Request timeout"));
   client.hgetall(userId, function (err, user) {
-    callback(err, user);
+    clearTimeout(timer);
+    return callback(err, user);
   });
 }
 

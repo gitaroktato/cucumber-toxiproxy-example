@@ -17,10 +17,7 @@
         "config_id": "local"
     },
     "toxiproxy": {
-        "config_id": "toxiproxy",
-        "mysql": {
-          "port": 13306
-        }
+        "config_id": "toxiproxy"
     },
     "config-test": {
       "config_id": "test",
