@@ -13,16 +13,24 @@ app.get('/users/:userId', function (req, res) {
     const userId = req.params.userId;
     // get from cache
     cache.getUser(cacheClient, userId, (err, user) => {
-      if (err) throw err;
-      if (user) {
-        console.log("Loaded from REDIS - %o", user);
+      // Let's ignore error and just try to continue.. What could go wrong?
+      if (err) {
+        console.error("REDIS error, when getting user - ", err);
+      }
+      // Check if result has something.
+      // thunk-redis returns empty object if key doesn't exist.
+      console.debug("REDIS returned - %o", user);
+      if (user.id) {
         res.set("X-Data-Source", "cache");
         res.json(user);
       } else {
         // get from database
         dao.getUser(daoConnection, userId, (err, user) => {
-          if (err) throw err;
-          console.log("Loaded from MySQL - %o", user);
+          if (err) {
+            console.error("MySQL error, when getting user - ", err);
+            return res.sendStatus(503);
+          }
+          console.debug("Loaded from MySQL - %o", user);
           cache.storeUser(cacheClient, user);
           res.set("X-Data-Source", "origin");
           res.json(user);
@@ -36,6 +44,7 @@ app.put('/users/:userId', function (req, res) {
   user.id = req.params.userId;
   dao.saveUser(daoConnection, user, (err) => {
     if (err) {
+      console.error("MySQL error, when saving user - ", err);
       return res.sendStatus(503);
     }
     console.debug("Saved user - %o", user);

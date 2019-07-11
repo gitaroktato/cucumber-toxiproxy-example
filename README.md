@@ -1,4 +1,4 @@
-# How to build resilient microservices?
+# Building resilient microservices using Toxiproxy and Cucumber
 
 # Goal
 ## Local / Staging

@@ -13,10 +13,7 @@ describe('Asynchronous config usage', () => {
         password: "password",
         port: 3306
       },
-      redis: {
-        host: "1.2.3.4",
-        port: 6379
-      },
+      redis: ["1.2.3.4:6379", "1.2.3.5:6379"],
       initSql: false
     };
     config.load('config-test', result => {

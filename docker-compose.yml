@@ -4,7 +4,9 @@ services:
     image: "shopify/toxiproxy"
     ports:
        - "8474:8474"
-       - "13306:3306"
+       - "3306:3306"
+       - "6379:6379"
+       - "16379:16379"
   # We created proxy configuration from another ephermal container
   toxiproxy-config:
     image: "shopify/toxiproxy"
@@ -15,11 +17,11 @@ services:
   redis-master:
     image: "redis:alpine"
     ports:
-      - "6379:6379"
+      - "6379"
   redis-slave:
     image: "redis:alpine"
     ports:
-      - "16379:6379"
+      - "6379"
     command: redis-server --slaveof redis-master 6379
   mysql:
     image: mysql:5.6

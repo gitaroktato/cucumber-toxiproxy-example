@@ -8,8 +8,10 @@ beforeEach(() => {
   client = {
     del: sinon.stub()
   };
+  client.del.returns((callback) => {
+    callback();
+  });
 });
-
 
 describe('Eviction of a specific user', () => {
   it('should call del, when user is evicted', () => {
