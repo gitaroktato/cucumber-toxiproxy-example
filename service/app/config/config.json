@@ -7,10 +7,7 @@
         "user": "root",
         "password": "letmein"
       },
-      "redis": {
-        "host": "192.168.99.106",
-        "port": 6379
-      },
+      "redis": ["192.168.99.106:6379", "192.168.99.106:16379"],
       "initSql": false
     },
     "local": {

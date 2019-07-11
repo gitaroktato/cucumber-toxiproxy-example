@@ -17,7 +17,7 @@
     "express": "^4.16.4",
     "lodash": "^4.17.11",
     "mysql": "^2.16.0",
-    "redis": "^2.8.0"
+    "thunk-redis": "^2.2.4"
   },
   "devDependencies": {
     "chai": "^4.2.0",

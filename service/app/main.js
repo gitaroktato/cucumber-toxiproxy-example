@@ -17,7 +17,10 @@ app.get('/users/:userId', function (req, res) {
       if (err) {
         console.error("REDIS error, when getting user - ", err);
       }
-      if (user) {
+      // Check if result has something.
+      // thunk-redis returns empty object if key doesn't exist.
+      console.debug("REDIS returned - %o", user);
+      if (user.id) {
         console.debug("Loaded from REDIS - %o", user);
         res.set("X-Data-Source", "cache");
         res.json(user);
