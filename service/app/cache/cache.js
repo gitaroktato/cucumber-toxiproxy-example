@@ -14,18 +14,19 @@ function connect(properties, onConnected) {
 
 function getUser(client, userId, callback) {
   // TODO timeout from config
-  // const timer = setTimeout(callback, 200, new Error("Request timeout"));
   client.hgetall(userId)(callback);
-  client.info()(console.log);
 }
 
 function storeUser(client, user) {
-  client.hmset(user.id, 'id', user.id, 'name', user.name)();
-  client.info()(console.log);
+  client.hmset(user.id, 'id', user.id, 'name', user.name)(err => {
+    if (err) console.error("Storing user in REDIS failed", err);
+  });
 }
 
 function evictUser(client, userId) {
-  client.del(userId);
+  client.del(userId)(err => {
+    if (err) console.error("Deleting user in REDIS failed", err);
+  });
 }
 
 module.exports = {

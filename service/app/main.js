@@ -21,7 +21,6 @@ app.get('/users/:userId', function (req, res) {
       // thunk-redis returns empty object if key doesn't exist.
       console.debug("REDIS returned - %o", user);
       if (user.id) {
-        console.debug("Loaded from REDIS - %o", user);
         res.set("X-Data-Source", "cache");
         res.json(user);
       } else {
