@@ -7,9 +7,7 @@ function connect(properties, onConnected) {
   client.on("error", function (err) {
     console.error("Redis error caught on callback - ", err);
   });
-  client.on("connect", () => {
-    onConnected(null, client);
-  });
+  onConnected(null, client);
 }
 
 function getUser(client, userId, callback) {
@@ -19,13 +17,21 @@ function getUser(client, userId, callback) {
 
 function storeUser(client, user) {
   client.hmset(user.id, 'id', user.id, 'name', user.name)(err => {
-    if (err) console.error("Storing user in REDIS failed", err);
+    if (err) {
+      console.error("Storing user in REDIS failed", err);
+      // TODO setTimeout(...) to reconnect to master
+      client.clientEnd();
+      client.clientConnect();
+    }
   });
 }
 
 function evictUser(client, userId) {
   client.del(userId)(err => {
-    if (err) console.error("Deleting user in REDIS failed", err);
+    if (err) {
+      console.error("Deleting user in REDIS failed", err);
+      client.clientConnect();
+    }
   });
 }
 

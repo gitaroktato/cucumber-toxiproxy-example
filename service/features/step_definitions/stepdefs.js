@@ -21,16 +21,12 @@ function toggleService(name, status, callback) {
   });
 }
 
-Given('MySQL is down', function (callback) {
-  toggleService('mysql', false, callback);
+Given('{string} is down', function (service, callback) {
+  toggleService(service.toLowerCase(), false, callback);
 });
 
-Given('Redis master is down', function (callback) {
-  toggleService('redis-master', false, callback);
-});
-
-When('MySQL is up', function (callback) {
-  toggleService('mysql', true, callback);
+When('{string} is up', function (service, callback) {
+  toggleService(service.toLowerCase(), true, callback);
 });
 
 When('user {string} is requested', function (userId, callback) {
@@ -44,7 +40,7 @@ When('user {string} is requested', function (userId, callback) {
   });
 });
 
-When('new user created with id {string} and name {string}', function (userId, name, callback) {
+function saveUser(userId, name, callback) {
   const user = {
     name: name,
     id: userId
@@ -56,7 +52,11 @@ When('new user created with id {string} and name {string}', function (userId, na
     this.statusCode = res.statusCode;
     callback();
   });
-});
+}
+
+When('new user created with id {string} and name {string}', saveUser);
+
+When('user is updated with id {string} and name {string}', saveUser);
 
 Then('HTTP {int} is returned', function (statusCode) {
   assert.equal(this.statusCode, statusCode);
@@ -64,6 +64,17 @@ Then('HTTP {int} is returned', function (statusCode) {
 
 Then('the user with id {string} is returned from {string}', function (userId, dataSource) {
   assert.equal(this.user.id, userId);
+  if (dataSource === "Redis") {
+    assert.equal(this.dataSource, "cache");
+  } else {
+    assert.equal(this.dataSource, "origin");
+  }
+});
+
+Then('the user with id {string} and name {string} is returned from {string}',
+function (userId, name, dataSource) {
+  assert.equal(this.user.id, userId);
+  assert.equal(this.user.name, name);
   if (dataSource === "Redis") {
     assert.equal(this.dataSource, "cache");
   } else {
