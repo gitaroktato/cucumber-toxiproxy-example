@@ -7,7 +7,10 @@
         "user": "root",
         "password": "letmein"
       },
-      "redis": ["192.168.99.106:6379", "192.168.99.106:16379"],
+      "redis": {
+        "hosts": ["192.168.99.106:6379", "192.168.99.106:16379"],
+        "reconnectToMasterMs": 50
+      },
       "initSql": false
     },
     "local": {
