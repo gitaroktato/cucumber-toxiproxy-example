@@ -1,7 +1,7 @@
 "use strict";
 const request = require('request');
 const assert = require('assert');
-const { Given, When, Then } = require('cucumber');
+const { Given, When, Then, Before } = require('cucumber');
 // TODO to configuration
 const SERVICE_URL = 'http://localhost:8080';
 const TOXIPROXY_URL = 'http://192.168.99.106:8474';
@@ -14,15 +14,61 @@ function toggleService(name, status, callback) {
   request.post(`${TOXIPROXY_URL}/proxies/${name}`,
     { json: true , body: proxy}, (err, res) => {
     if (err) return callback(err);
-    if (res.statusCode !== 200) {
-      return callback(`Got status code after update: ${res.statusCode}`);
+    if (res.statusCode !== 200
+      && res.statusCode !== 204) {
+      return callback(`Got status code after setting ${name} to ${status}: ${res.statusCode}`);
     }
     callback();
   });
 }
 
+function timeoutService(name, callback) {
+  const toxic = {
+    name: 'timeout',
+    type: 'timeout',
+    attributes: {timeout: 5000}
+  };
+  request.post(`${TOXIPROXY_URL}/proxies/${name}/toxics`,
+    { json: true , body: toxic}, (err, res) => {
+    if (err) return callback(err);
+    if (res.statusCode !== 200) {
+      return callback(`Got status code after updating toxic for ${name}: ${res.statusCode}`);
+    }
+    callback();
+  });
+}
+
+function clearTimeoutFor(name, callback) {
+  request.del(`${TOXIPROXY_URL}/proxies/${name}/toxics/timeout`,
+    { json: true }, (err, res) => {
+    if (err) return callback(err);
+    if (res.statusCode !== 200
+      && res.statusCode !== 404
+      && res.statusCode !== 204) {
+      return callback(`Got status code after clearing toxic ${name}: ${res.statusCode}`);
+    }
+    callback();
+  });
+}
+
+Before((_, callback) => {
+  toggleService('mysql', true, () => {
+    toggleService('redis-master', true, () => {
+      toggleService('redis-slave', true, () => {
+        clearTimeoutFor('redis-master', () => {
+          clearTimeoutFor('redis-slave', callback);
+        });
+      });
+    });
+  });
+});
+
 Given('{string} is down', function (service, callback) {
   toggleService(service.toLowerCase(), false, callback);
+});
+
+Given('{string} times out', function (service, callback) {
+  timeoutService(service.toLowerCase(), callback);
 });
 
 When('{string} is up', function (service, callback) {

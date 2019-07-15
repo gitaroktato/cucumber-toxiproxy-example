@@ -7,8 +7,14 @@ function connect({hosts, reconnectToMasterMs}, onConnected) {
   client.on("error", function (err) {
     console.error("Redis error caught on callback - ", err);
   });
+  client.on("warn", function (err) {
+    console.warn("Redis warning caught on callback - ", err);
+  });
   onConnected(null, client);
 }
+
+// TODO move reconnect to separate function
+
 
 function getUser(client, userId, callback) {
   // TODO timeout from config (when all nodes down)

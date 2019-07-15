@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "Get toxiproxy proxies",
+			"name": "Get toxiproxy for mysql",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -16,13 +16,13 @@
 					{
 						"key": "Content-Type",
 						"name": "Content-Type",
-						"value": "application/x-www-form-urlencoded",
-						"type": "text"
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"type\": \"timeout\",\n\t\"attributes\": {\n\t\t\"timeout\": 5000\n\t}\n}"
+					"raw": ""
 				},
 				"url": {
 					"raw": "192.168.99.106:8474/proxies/mysql",
@@ -42,15 +42,15 @@
 			"response": []
 		},
 		{
-			"name": "Create user",
+			"name": "Save user",
 			"request": {
-				"method": "POST",
+				"method": "PUT",
 				"header": [
 					{
 						"key": "Content-Type",
 						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
+						"type": "text",
+						"value": "application/json"
 					}
 				],
 				"body": {
@@ -58,7 +58,8 @@
 					"raw": "{\n    \"id\": \"u-123455\",\n    \"name\": \"Joe\"\n}"
 				},
 				"url": {
-					"raw": "localhost:8080/users/u-123456",
+					"raw": "http://localhost:8080/users/u-123456",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
@@ -86,6 +87,142 @@
 					"path": [
 						"users",
 						"u-12345abde234"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Enable toxiproxy for mysql",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"mysql\",\n    \"enabled\": true\n}"
+				},
+				"url": {
+					"raw": "192.168.99.106:8474/proxies/mysql",
+					"host": [
+						"192",
+						"168",
+						"99",
+						"106"
+					],
+					"port": "8474",
+					"path": [
+						"proxies",
+						"mysql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Enable toxiproxy for redis",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"redis-master\",\n    \"enabled\": true\n}"
+				},
+				"url": {
+					"raw": "192.168.99.106:8474/proxies/redis-master",
+					"host": [
+						"192",
+						"168",
+						"99",
+						"106"
+					],
+					"port": "8474",
+					"path": [
+						"proxies",
+						"redis-master"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get toxiproxy for redis-master",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "192.168.99.106:8474/proxies/redis-master",
+					"host": [
+						"192",
+						"168",
+						"99",
+						"106"
+					],
+					"port": "8474",
+					"path": [
+						"proxies",
+						"redis-master"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Timeout for redis-master",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"timeout\",\n    \"type\": \"timeout\",\n    \"attributes\": {\"timeout\": 1000}\n}"
+				},
+				"url": {
+					"raw": "192.168.99.106:8474/proxies/redis-master/toxics",
+					"host": [
+						"192",
+						"168",
+						"99",
+						"106"
+					],
+					"port": "8474",
+					"path": [
+						"proxies",
+						"redis-master",
+						"toxics"
 					]
 				}
 			},
