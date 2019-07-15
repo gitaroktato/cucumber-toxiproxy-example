@@ -2,9 +2,9 @@
 [ ] circuit breakers
 [/] redis read only, when mysql down
 [/] fixing connection pools for REDIS
-[ ] redis read only, when redis master down
+[/] redis read only, when redis master down
 [ ] mysql, when redis is down
-[ ] recovery, when Redis is back up
+[/] recovery, when Redis is back up
 [ ] return some defaults when everything is down
 [ ] install from SQL file not hardcoded inline SQL (Docker?)
 [ ] Fix docker volumes

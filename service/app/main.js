@@ -19,8 +19,8 @@ app.get('/users/:userId', function (req, res) {
       }
       // Check if result has something.
       // thunk-redis returns empty object if key doesn't exist.
-      console.debug("REDIS returned - %o", user);
-      if (user.id) {
+      if (user && user.id) {
+        console.debug("Loaded from REDIS - %o", user);
         res.set("X-Data-Source", "cache");
         res.json(user);
       } else {
@@ -29,6 +29,9 @@ app.get('/users/:userId', function (req, res) {
           if (err) {
             console.error("MySQL error, when getting user - ", err);
             return res.sendStatus(503);
+          }
+          if (!user) {
+            return res.sendStatus(404);
           }
           console.debug("Loaded from MySQL - %o", user);
           cache.storeUser(cacheClient, user);
