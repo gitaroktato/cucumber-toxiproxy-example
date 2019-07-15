@@ -3,7 +3,7 @@ const redis = require("thunk-redis");
 
 // TODO destructuring?
 function connect(properties, onConnected) {
-  const client = redis.createClient(properties, {onlyMaster: false, clusterMode: false});
+  const client = redis.createClient(properties, {onlyMaster: false});
   client.on("error", function (err) {
     console.error("Redis error caught on callback - ", err);
   });
@@ -11,7 +11,7 @@ function connect(properties, onConnected) {
 }
 
 function getUser(client, userId, callback) {
-  // TODO timeout from config
+  // TODO timeout from config (when all nodes down)
   client.hgetall(userId)(callback);
 }
 
