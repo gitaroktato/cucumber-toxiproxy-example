@@ -1,7 +1,7 @@
 "use strict";
 const request = require('request');
 const assert = require('assert');
-const { Given, When, Then, Before } = require('cucumber');
+const { Given, When, Then, Before, AfterAll } = require('cucumber');
 // TODO to configuration
 const SERVICE_URL = 'http://localhost:8080';
 const TOXIPROXY_URL = 'http://192.168.99.106:8474';
@@ -12,46 +12,46 @@ function toggleService(name, status, callback) {
     enabled: status
   };
   request.post(`${TOXIPROXY_URL}/proxies/${name}`,
-    { json: true , body: proxy}, (err, res) => {
-    if (err) return callback(err);
-    if (res.statusCode !== 200
-      && res.statusCode !== 204) {
-      return callback(`Got status code after setting ${name} to ${status}: ${res.statusCode}`);
-    }
-    callback();
-  });
+    { json: true, body: proxy }, (err, res) => {
+      if (err) return callback(err);
+      if (res.statusCode !== 200
+        && res.statusCode !== 204) {
+        return callback(`Got status code after setting ${name} to ${status}: ${res.statusCode}`);
+      }
+      callback();
+    });
 }
 
 function timeoutService(name, callback) {
   const toxic = {
     name: 'timeout',
     type: 'timeout',
-    attributes: {timeout: 5000}
+    attributes: { timeout: 5000 }
   };
   request.post(`${TOXIPROXY_URL}/proxies/${name}/toxics`,
-    { json: true , body: toxic}, (err, res) => {
-    if (err) return callback(err);
-    if (res.statusCode !== 200) {
-      return callback(`Got status code after updating toxic for ${name}: ${res.statusCode}`);
-    }
-    callback();
-  });
+    { json: true, body: toxic }, (err, res) => {
+      if (err) return callback(err);
+      if (res.statusCode !== 200) {
+        return callback(`Got status code after updating toxic for ${name}: ${res.statusCode}`);
+      }
+      callback();
+    });
 }
 
 function clearTimeoutFor(name, callback) {
   request.del(`${TOXIPROXY_URL}/proxies/${name}/toxics/timeout`,
     { json: true }, (err, res) => {
-    if (err) return callback(err);
-    if (res.statusCode !== 200
-      && res.statusCode !== 404
-      && res.statusCode !== 204) {
-      return callback(`Got status code after clearing toxic ${name}: ${res.statusCode}`);
-    }
-    callback();
-  });
+      if (err) return callback(err);
+      if (res.statusCode !== 200
+        && res.statusCode !== 404
+        && res.statusCode !== 204) {
+        return callback(`Got status code after clearing toxic ${name}: ${res.statusCode}`);
+      }
+      callback();
+    });
 }
 
-Before((_, callback) => {
+function resetToxiproxy(callback) {
   toggleService('mysql', true, () => {
     toggleService('redis-master', true, () => {
       toggleService('redis-slave', true, () => {
@@ -61,6 +61,14 @@ Before((_, callback) => {
       });
     });
   });
+}
+
+Before((_, callback) => {
+  resetToxiproxy(callback);
+});
+
+AfterAll((callback) => {
+  resetToxiproxy(callback);
 });
 
 Given('{string} is down', function (service, callback) {
@@ -118,12 +126,12 @@ Then('the user with id {string} is returned from {string}', function (userId, da
 });
 
 Then('the user with id {string} and name {string} is returned from {string}',
-function (userId, name, dataSource) {
-  assert.equal(this.user.id, userId);
-  assert.equal(this.user.name, name);
-  if (dataSource === "Redis") {
-    assert.equal(this.dataSource, "cache");
-  } else {
-    assert.equal(this.dataSource, "origin");
-  }
-});
+  function (userId, name, dataSource) {
+    assert.equal(this.user.id, userId);
+    assert.equal(this.user.name, name);
+    if (dataSource === "Redis") {
+      assert.equal(this.dataSource, "cache");
+    } else {
+      assert.equal(this.dataSource, "origin");
+    }
+  });
