@@ -92,6 +92,7 @@ When('user {string} is requested', function (userId, callback) {
     if (err) {
       return callback(err);
     }
+    this.statusCode = res.statusCode;
     this.user = body;
     this.dataSource = res.headers['x-data-source'];
     callback();
@@ -121,6 +122,7 @@ Then('HTTP {int} is returned', function (statusCode) {
 });
 
 Then('the user with id {string} is returned from {string}', function (userId, dataSource) {
+  assert.equal(this.statusCode, 200);
   assert.equal(this.user.id, userId);
   if (dataSource === "Redis") {
     assert.equal(this.dataSource, "cache");

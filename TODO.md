@@ -4,6 +4,7 @@
 [/] redis read only, when redis master down
 [/] mysql, when redis is down
 [/] recovery, when Redis is back up
+[ ] cleanups and warmups (caching is missing for default user)
 [?] cache expiration (timeouts?)
 [?] domain
 [ ] return some defaults when everything is down

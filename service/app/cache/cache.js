@@ -64,7 +64,7 @@ function reconnectOnReadOnlyError(client, err) {
   if (!err.code || err.code !== 'READONLY') {
     return;
   }
-  // TODO schedule only one timeout (stateful functions?)
+  // TODO schedule only one timeout (stateful monads?)
   setTimeout(() => {
     reconnect(client);
   }, client.reconnectToMasterMs);
