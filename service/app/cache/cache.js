@@ -19,36 +19,28 @@ function reconnect(client) {
   client.clientConnect();
 }
 
-function pingWithTimeout(client, timeout) {
+function pingWithTimeout(client, timeout, callback) {
   const onPingTimeout = setTimeout(() => {
-    callback(new Error("Ping timed out"));
-  }, 500);
+    callback(new Error(`Ping timed out after ${timeout}ms`));
+  }, timeout);
   client.ping()((err) => {
-    console.debug(`${Date.now()} - ping`);
     clearTimeout(onPingTimeout);
+    console.debug(`${Date.now()} - ping`);
     callback(err);
   });
 }
 
-// TODO move reconnect to separate function
 function initiateScheduledPing(client) {
-  const doPing = () => {
-    const onPingTimeout = setTimeout(() => {
-      console.error("Ping timeout, reconnecting");
-      reconnect(client);
-      setTimeout(doPing, 500);
-    }, 500);
-    client.ping()((err) => {
-      console.debug(`${Date.now()} - ping`);
+  const schedulePingMs = 1000;
+  const pingTimeoutMs = 800;
+  setInterval(() => {
+    pingWithTimeout(client, pingTimeoutMs, (err) => {
       if (err) {
-        console.error("Ping failed, reconnecting", err);
+        console.error("Ping failed, reconnecting:", err);
         reconnect(client);
       }
-      clearTimeout(onPingTimeout);
-      setTimeout(doPing, 500);
     });
-  };
-  setTimeout(doPing, 500);
+  }, schedulePingMs);
 }
 
 function getUser(client, userId, callback) {
