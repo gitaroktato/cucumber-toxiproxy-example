@@ -28,5 +28,11 @@ Feature: Cache availability scenarios for user service
     And user 'u-111' is requested
     And user 'u-111' is requested
     Then the user with id 'u-111' and name 'Joe' is returned from 'Redis'
+
+  Scenario: Redis master/slave time out
+    Given 'redis-master' times out
+    And 'redis-slave' times out
+    When user 'u-12345abde234' is requested
+    Then the user with id 'u-12345abde234' is returned from 'MySQL'
   
     
