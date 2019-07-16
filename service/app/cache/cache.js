@@ -1,9 +1,20 @@
 "use strict";
 const redis = require("thunk-redis");
 
-function connect({hosts, reconnectToMasterMs}, onConnected) {
+function connect(
+  {
+    hosts,
+    reconnectToMasterMs,
+    pingIntervalMs,
+    pingTimeoutMs,
+    callTimeoutMs
+  },
+  callback) {
   const client = redis.createClient(hosts, {onlyMaster: false});
   client.reconnectToMasterMs = reconnectToMasterMs;
+  client.pingIntervalMs = pingIntervalMs;
+  client.pingTimeoutMs = pingTimeoutMs;
+  client.callTimeoutMs = callTimeoutMs;
   client.on("error", function (err) {
     console.error("Redis error caught on callback - ", err);
   });
@@ -11,7 +22,7 @@ function connect({hosts, reconnectToMasterMs}, onConnected) {
     console.warn("Redis warning caught on callback - ", err);
   });
   initiateScheduledPing(client);
-  onConnected(null, client);
+  callback(null, client);
 }
 
 function reconnect(client) {
@@ -19,33 +30,34 @@ function reconnect(client) {
   client.clientConnect();
 }
 
-function pingWithTimeout(client, timeout, callback) {
-  const onPingTimeout = setTimeout(() => {
-    callback(new Error(`Ping timed out after ${timeout}ms`));
+function callWithTimeout(method, timeout, callback) {
+  let timeoutTriggered = false;
+  const afterTimeout = setTimeout(() => {
+    timeoutTriggered = true;
+    callback(new Error(`Execution timed out after ${timeout}ms`));
   }, timeout);
-  client.ping()((err) => {
-    clearTimeout(onPingTimeout);
-    console.debug(`${Date.now()} - ping`);
-    callback(err);
+  method((...args) => {
+    clearTimeout(afterTimeout);
+    // We avoid sending callbacks multiple times.
+    if (!timeoutTriggered) {
+      return callback(...args);
+    }
   });
 }
 
 function initiateScheduledPing(client) {
-  const schedulePingMs = 1000;
-  const pingTimeoutMs = 800;
   setInterval(() => {
-    pingWithTimeout(client, pingTimeoutMs, (err) => {
+    callWithTimeout(client.ping(), client.pingTimeoutMs, (err) => {
       if (err) {
         console.error("Ping failed, reconnecting:", err);
         reconnect(client);
       }
     });
-  }, schedulePingMs);
+  }, client.pingIntervalMs);
 }
 
 function getUser(client, userId, callback) {
-  // TODO timeout from config (when all nodes down)
-  client.hgetall(userId)(callback);
+  callWithTimeout(client.hgetall(userId), client.callTimeoutMs, callback);
 }
 
 function reconnectOnReadOnlyError(client, err) {

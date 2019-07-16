@@ -9,7 +9,10 @@
       },
       "redis": {
         "hosts": ["192.168.99.106:6379", "192.168.99.106:16379"],
-        "reconnectToMasterMs": 50
+        "reconnectToMasterMs": 50,
+        "pingIntervalMs": 1000,
+        "pingTimeoutMs": 800,
+        "callTimeoutMs": 800
       },
       "initSql": false
     },

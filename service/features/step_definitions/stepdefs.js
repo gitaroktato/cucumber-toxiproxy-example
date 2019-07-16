@@ -5,6 +5,8 @@ const { Given, When, Then, Before, AfterAll } = require('cucumber');
 // TODO to configuration
 const SERVICE_URL = 'http://localhost:8080';
 const TOXIPROXY_URL = 'http://192.168.99.106:8474';
+const TEST_RECOVERY_INTERVAL = 200;
+const DEFAULT_TIMEOUT_FOR_SERVICES = 50000;
 
 function toggleService(name, status, callback) {
   const proxy = {
@@ -26,7 +28,7 @@ function timeoutService(name, callback) {
   const toxic = {
     name: 'timeout',
     type: 'timeout',
-    attributes: { timeout: 5000 }
+    attributes: { timeout: DEFAULT_TIMEOUT_FOR_SERVICES }
   };
   request.post(`${TOXIPROXY_URL}/proxies/${name}/toxics`,
     { json: true, body: toxic }, (err, res) => {
@@ -64,7 +66,9 @@ function resetToxiproxy(callback) {
 }
 
 Before((_, callback) => {
-  resetToxiproxy(callback);
+  resetToxiproxy(() => {
+    setTimeout(callback, TEST_RECOVERY_INTERVAL);
+  });
 });
 
 AfterAll((callback) => {

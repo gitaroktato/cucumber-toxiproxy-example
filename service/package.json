@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "cucumber-test": "cucumber-js features/cache-availability.feature",
+    "cucumber-test": "cucumber-js",
     "test": "mocha",
     "lint": "eslint .",
     "nodemon": "nodemon index.js",
