@@ -10,11 +10,46 @@ function connect({hosts, reconnectToMasterMs}, onConnected) {
   client.on("warn", function (err) {
     console.warn("Redis warning caught on callback - ", err);
   });
+  initiateScheduledPing(client);
   onConnected(null, client);
 }
 
-// TODO move reconnect to separate function
+function reconnect(client) {
+  client.clientEnd();
+  client.clientConnect();
+}
 
+function pingWithTimeout(client, timeout) {
+  const onPingTimeout = setTimeout(() => {
+    callback(new Error("Ping timed out"));
+  }, 500);
+  client.ping()((err) => {
+    console.debug(`${Date.now()} - ping`);
+    clearTimeout(onPingTimeout);
+    callback(err);
+  });
+}
+
+// TODO move reconnect to separate function
+function initiateScheduledPing(client) {
+  const doPing = () => {
+    const onPingTimeout = setTimeout(() => {
+      console.error("Ping timeout, reconnecting");
+      reconnect(client);
+      setTimeout(doPing, 500);
+    }, 500);
+    client.ping()((err) => {
+      console.debug(`${Date.now()} - ping`);
+      if (err) {
+        console.error("Ping failed, reconnecting", err);
+        reconnect(client);
+      }
+      clearTimeout(onPingTimeout);
+      setTimeout(doPing, 500);
+    });
+  };
+  setTimeout(doPing, 500);
+}
 
 function getUser(client, userId, callback) {
   // TODO timeout from config (when all nodes down)
@@ -25,9 +60,9 @@ function reconnectOnReadOnlyError(client, err) {
   if (!err.code || err.code !== 'READONLY') {
     return;
   }
+  // TODO schedule only one timeout (stateful functions?)
   setTimeout(() => {
-    client.clientEnd();
-    client.clientConnect();
+    reconnect(client);
   }, client.reconnectToMasterMs);
   console.debug("Reconnecting to master after %d ms", client.reconnectToMasterMs);
 }
