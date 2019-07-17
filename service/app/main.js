@@ -4,6 +4,7 @@ const config = require('./config');
 const dao = require("./dao");
 const cache = require("./cache");
 const app = express();
+// TODO remove vars
 var cacheClient;
 var daoConnection;
 

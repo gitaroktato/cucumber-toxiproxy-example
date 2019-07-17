@@ -1,6 +1,9 @@
 Feature: Cache availability scenarios for user service
   User service should survive all possible failure scenarios
 
+  # Background:
+  #   Given user 'u-12345abde234' with name 'Jack' is cached
+
   Scenario: Cache read-only mode without Redis master
     Given 'redis-master' is down
     When user 'u-12345abde234' is requested

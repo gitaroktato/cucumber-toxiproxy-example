@@ -1,12 +1,14 @@
 "use strict";
 const request = require('request');
 const assert = require('assert');
-const { Given, When, Then, Before, AfterAll } = require('cucumber');
+const redis = require("thunk-redis");
+const mysql = require("mysql");
+const { Given, When, Then, Before, BeforeAll, AfterAll } = require('cucumber');
 // TODO to configuration
 const SERVICE_URL = 'http://localhost:8080';
 const TOXIPROXY_URL = 'http://192.168.99.106:8474';
-const TEST_RECOVERY_INTERVAL = 200;
-const DEFAULT_TIMEOUT_FOR_SERVICES = 50000;
+const TEST_RECOVERY_INTERVAL = 800;
+const DEFAULT_TIMEOUT_FOR_SERVICES = 5000;
 
 function toggleService(name, status, callback) {
   const proxy = {
@@ -65,13 +67,32 @@ function resetToxiproxy(callback) {
   });
 }
 
+BeforeAll((_, callback) => {
+  // TODO wipe MySQL and will be OK
+  this.client = redis.createClient(["192.168.99.106:6380"]);
+  this.mysql = mysql.createConnection({
+    host: "192.168.99.106",
+    port: "3307",
+    user: "root",
+    password: "letmein"
+  });
+  this.mysql.connect(callback);
+});
+
 Before((_, callback) => {
+  // Connect to redis directly
+  this.client.flushdb()();
+  this.client.hmset('u-12345abde234', 'id', 'u-12345abde234', 'name', 'Jack')();
+  this.mysql.query("DELETE FROM users.user WHERE id != 'u-12345abde234'");
+  // reset ToxyProxy
   resetToxiproxy(() => {
     setTimeout(callback, TEST_RECOVERY_INTERVAL);
   });
 });
 
 AfterAll((callback) => {
+  this.client.quit()();
+  this.mysql.end();
   resetToxiproxy(callback);
 });
 
