@@ -68,7 +68,6 @@ function resetToxiproxy(callback) {
 }
 
 BeforeAll((_, callback) => {
-  // TODO wipe MySQL and will be OK
   this.client = redis.createClient(["192.168.99.106:6380"]);
   this.mysql = mysql.createConnection({
     host: "192.168.99.106",
@@ -80,8 +79,8 @@ BeforeAll((_, callback) => {
 });
 
 Before((_, callback) => {
-  // Connect to redis directly
   this.client.flushdb()();
+  // TODO move these to Background scenario
   this.client.hmset('u-12345abde234', 'id', 'u-12345abde234', 'name', 'Jack')();
   this.mysql.query("DELETE FROM users.user WHERE id != 'u-12345abde234'");
   // reset ToxyProxy

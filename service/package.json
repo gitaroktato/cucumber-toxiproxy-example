@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "cucumber-test": "cucumber-js",
+    "cucumber-fragile": "cucumber-js --tags @fragile",
     "test": "mocha",
     "lint": "eslint .",
     "nodemon": "nodemon index.js",

@@ -9,12 +9,12 @@
       },
       "redis": {
         "hosts": ["192.168.99.106:6379", "192.168.99.106:16379"],
-        "reconnectToMasterMs": 200,
+        "reconnectToMasterMs": 50,
         "pingIntervalMs": 1000,
         "pingTimeoutMs": 200,
         "callTimeoutMs": 200
       },
-      "initSql": true
+      "initSql": false
     },
     "local": {
         "config_id": "local"
