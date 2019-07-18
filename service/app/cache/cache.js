@@ -1,15 +1,13 @@
 "use strict";
 const redis = require("thunk-redis");
 
-function connect(
-  {
+function connect({
     hosts,
     reconnectToMasterMs,
     pingIntervalMs,
     pingTimeoutMs,
     callTimeoutMs
-  },
-  callback) {
+  }, callback) {
   const client = redis.createClient(hosts, {onlyMaster: false});
   client.reconnectToMasterMs = reconnectToMasterMs;
   client.pingIntervalMs = pingIntervalMs;
