@@ -4,15 +4,13 @@ const config = require('./config');
 const dao = require("./dao");
 const cache = require("./cache");
 const app = express();
-var cacheClient;
-var daoConnection;
 
 app.use(express.json());
 
 app.get('/users/:userId', function (req, res) {
     const userId = req.params.userId;
     // get from cache
-    cache.getUser(cacheClient, userId, (err, user) => {
+    cache.getUser(app.cacheClient, userId, (err, user) => {
       // Let's ignore error and just try to continue.. What could go wrong?
       if (err) {
         console.error("REDIS error, when getting user - ", err);
@@ -25,7 +23,7 @@ app.get('/users/:userId', function (req, res) {
         res.json(user);
       } else {
         // get from database
-        dao.getUser(daoConnection, userId, (err, user) => {
+        dao.getUser(app.daoConnection, userId, (err, user) => {
           if (err) {
             console.error("MySQL error, when getting user - ", err);
             return res.sendStatus(503);
@@ -34,7 +32,7 @@ app.get('/users/:userId', function (req, res) {
             return res.sendStatus(404);
           }
           console.debug("Loaded from MySQL - %o", user);
-          cache.storeUser(cacheClient, user);
+          cache.storeUser(app.cacheClient, user);
           res.set("X-Data-Source", "origin");
           res.json(user);
         });
@@ -45,13 +43,13 @@ app.get('/users/:userId', function (req, res) {
 app.put('/users/:userId', function (req, res) {
   const user = req.body;
   user.id = req.params.userId;
-  dao.saveUser(daoConnection, user, (err) => {
+  dao.saveUser(app.daoConnection, user, (err) => {
     if (err) {
       console.error("MySQL error, when saving user - ", err);
       return res.sendStatus(503);
     }
     console.debug("Saved user - %o", user);
-    cache.evictUser(cacheClient, user.id);
+    cache.evictUser(app.cacheClient, user.id);
     res.sendStatus(200);
   });
 });
@@ -69,7 +67,7 @@ function startServer (callback) {
 function startCache (config, callback) {
   cache.connect(config.redis, (error, client) => {
     if (error) throw error;
-    cacheClient = client;
+    app.cacheClient = client;
     startServer(callback);
   });
 }
@@ -77,7 +75,7 @@ function startCache (config, callback) {
 function startDao (config, callback) {
   dao.connect(config.mysql, (error, connection) => {
     if (error) throw error;
-    daoConnection = connection;
+    app.daoConnection = connection;
     if (config.initSql === true) {
       dao.initTables(connection, () => {
         startCache(config, callback);

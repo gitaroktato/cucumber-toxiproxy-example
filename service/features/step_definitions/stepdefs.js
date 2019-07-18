@@ -1,12 +1,14 @@
 "use strict";
 const request = require('request');
 const assert = require('assert');
-const { Given, When, Then, Before, AfterAll } = require('cucumber');
+const redis = require("thunk-redis");
+const mysql = require("mysql");
+const { Given, When, Then, Before, BeforeAll, AfterAll } = require('cucumber');
 // TODO to configuration
 const SERVICE_URL = 'http://localhost:8080';
 const TOXIPROXY_URL = 'http://192.168.99.106:8474';
-const TEST_RECOVERY_INTERVAL = 200;
-const DEFAULT_TIMEOUT_FOR_SERVICES = 50000;
+const TEST_RECOVERY_INTERVAL = 300;
+const DEFAULT_TIMEOUT_FOR_SERVICES = 5000;
 
 function toggleService(name, status, callback) {
   const proxy = {
@@ -65,14 +67,55 @@ function resetToxiproxy(callback) {
   });
 }
 
+BeforeAll((_, callback) => {
+  this.client = redis.createClient(["192.168.99.106:6380"]);
+  this.mysql = mysql.createConnection({
+    host: "192.168.99.106",
+    port: "3307",
+    user: "root",
+    password: "letmein"
+  });
+  this.mysql.connect(callback);
+});
+
+function waitUntilConnectionsRecover(callback) {
+  setTimeout(callback, TEST_RECOVERY_INTERVAL);
+}
+
 Before((_, callback) => {
-  resetToxiproxy(() => {
-    setTimeout(callback, TEST_RECOVERY_INTERVAL);
+  this.client.flushdb()((err) => {
+    if (err) {
+      return callback(err);
+    }
+    this.mysql.query("DELETE FROM users.user", (err) => {
+      if (err) {
+        return callback(err);
+      }
+      resetToxiproxy(() => {
+        waitUntilConnectionsRecover(callback);
+      });
+    });
   });
 });
 
 AfterAll((callback) => {
+  this.client.quit()();
+  this.mysql.end();
   resetToxiproxy(callback);
+});
+
+Given('user {string} with name {string} is cached', (id, name, callback) => {
+  this.client.hmset(id, 'id', id, 'name', name)(callback);
+});
+
+Given('user {string} with name {string} is stored', (id, name, callback) => {
+  const query = "INSERT INTO users.user (id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?";
+  this.mysql.query(query, [id, name, name], (err) => {
+    if (err) {
+      return callback(err);
+    }
+    callback();
+  });
 });
 
 Given('{string} is down', function (service, callback) {
@@ -92,6 +135,7 @@ When('user {string} is requested', function (userId, callback) {
     if (err) {
       return callback(err);
     }
+    this.statusCode = res.statusCode;
     this.user = body;
     this.dataSource = res.headers['x-data-source'];
     callback();
@@ -116,11 +160,16 @@ When('new user created with id {string} and name {string}', saveUser);
 
 When('user is updated with id {string} and name {string}', saveUser);
 
+When('we wait a bit', function (callback) {
+  setTimeout(callback, 1000);
+});
+
 Then('HTTP {int} is returned', function (statusCode) {
   assert.equal(this.statusCode, statusCode);
 });
 
 Then('the user with id {string} is returned from {string}', function (userId, dataSource) {
+  assert.equal(this.statusCode, 200);
   assert.equal(this.user.id, userId);
   if (dataSource === "Redis") {
     assert.equal(this.dataSource, "cache");

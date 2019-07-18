@@ -27,8 +27,7 @@ function initTables(conn, callback) {
   multipleSqlCommands(conn,
     onFinished,
     "CREATE DATABASE users",
-    "CREATE TABLE users.user (id VARCHAR(255), name VARCHAR(255), PRIMARY KEY(id))",
-    "INSERT INTO users.user VALUES ('u-12345abde234', 'Bob')");
+    "CREATE TABLE users.user (id VARCHAR(255), name VARCHAR(255), PRIMARY KEY(id))");
 }
 
 function getUser(conn, id, callback) {
@@ -52,13 +51,12 @@ function saveUser(conn, user, callback) {
   });
 }
 
-// TODO destructuring?
-function connect(properties, callback) {
+function connect({host, port, user, password}, callback) {
   const pool = mysql.createPool({
-    host: properties.host,
-    port: properties.port,
-    user: properties.user,
-    password: properties.password
+    host: host,
+    port: port,
+    user: user,
+    password: password
   });
   callback(null, pool);
 }
