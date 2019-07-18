@@ -1,5 +1,9 @@
 Feature: Storage availability scenarios for user service
   User service should survive all possible failure scenarios
+  
+  Background:
+    Given user 'u-12345abde234' with name 'Jack' is cached
+    And user 'u-12345abde234' with name 'Jack' is stored
 
   Scenario: Read-only mode without MySQL
     Given 'MySQL' is down
