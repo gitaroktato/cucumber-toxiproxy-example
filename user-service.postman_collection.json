@@ -208,7 +208,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"timeout\",\n    \"type\": \"timeout\",\n    \"attributes\": {\"timeout\": 1000}\n}"
+					"raw": "{\n    \"name\": \"timeout\",\n    \"type\": \"timeout\",\n    \"attributes\": {\"timeout\": 5000}\n}"
 				},
 				"url": {
 					"raw": "192.168.99.106:8474/proxies/redis-master/toxics",
@@ -223,6 +223,41 @@
 						"proxies",
 						"redis-master",
 						"toxics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reset timeout for redis-master",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "192.168.99.106:8474/proxies/redis-master/toxics/timeout",
+					"host": [
+						"192",
+						"168",
+						"99",
+						"106"
+					],
+					"port": "8474",
+					"path": [
+						"proxies",
+						"redis-master",
+						"toxics",
+						"timeout"
 					]
 				}
 			},
