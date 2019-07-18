@@ -7,7 +7,7 @@ const { Given, When, Then, Before, BeforeAll, AfterAll } = require('cucumber');
 // TODO to configuration
 const SERVICE_URL = 'http://localhost:8080';
 const TOXIPROXY_URL = 'http://192.168.99.106:8474';
-const TEST_RECOVERY_INTERVAL = 300;
+const TEST_RECOVERY_INTERVAL = 800;
 const DEFAULT_TIMEOUT_FOR_SERVICES = 5000;
 
 function toggleService(name, status, callback) {

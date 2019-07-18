@@ -24,15 +24,21 @@ Feature: Cache availability scenarios for user service
     And user 'u-113' is requested
     Then the user with id 'u-113' and name 'Joe' is returned from 'Redis'
 
+  @single
   Scenario: Write cache connection is restored after Redis master is up
-    Given 'redis-master' is up
-    Given new user created with id 'u-111' and name 'Bob'
-    # We know it's cached now
-    And user 'u-111' is requested
-    When user is updated with id 'u-111' and name 'Joe'
-    And user 'u-111' is requested
-    And user 'u-111' is requested
-    Then the user with id 'u-111' and name 'Joe' is returned from 'Redis'
+    Given 'redis-master' is down
+    # This is a problem with how deletion is triggered
+    And user is updated with id 'u-12345abde234' and name 'Joe'
+    And 'redis-master' is up
+    When user is updated with id 'u-12345abde234' and name 'Joe'
+    And we wait a bit
+    When user is updated with id 'u-12345abde234' and name 'Joe'
+    And we wait a bit
+    When user is updated with id 'u-12345abde234' and name 'Joe'
+    And user 'u-12345abde234' is requested
+    And we wait a bit
+    And user 'u-12345abde234' is requested
+    Then the user with id 'u-12345abde234' and name 'Joe' is returned from 'Redis'
 
   Scenario: Redis master/slave time out
     Given 'redis-master' times out
