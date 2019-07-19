@@ -1,19 +1,19 @@
 # Designing resilient microservices with Toxiproxy and Cucumber
 
 ## Thinking about resiliency from day 0
-Resiliency, alongside with security and other traits, is hard to factor-in after the service is already built. It's created by making careful design decisions starting at the same time the service was born. What happens when the database isn't there? What happens if all connections time out? - you might ask.
+Resiliency, alongside with security and other traits, is hard to factor-in after the service is already built. It's created by making careful design decisions starting at the same time your service was born. "... but what happens when the database isn't there? What happens if all connections time out?" - you might ask. These are all valid questions and you better prepare for these situations before your service goes live.
 
 ## About Toxiproxy
-Toxiproxy is a cool programmable proxy made by Shopify for testing purposes. We're going to use it to predefine network characteristics in our ... which are describing our failure modes.
+Toxiproxy is a cool programmable proxy made by Shopify for testing purposes. We're going to use it to predefine network characteristics in our scenarios which are going to describe our failure modes.
 
 ## Why Cucumber?
-Failure modes are hard to understand, but still take a significant part in 
-We need a living documentation to understand the service's failure modes, so team can maintain and support te service at-ease. Also it gives some opportunity for experimenting after the step definitions are in-place.
+Failure modes are hard to understand, but still take a significant part in our service lifecycle. Often you can only understand failure modes of a specific service by looking at the source code. These implementations are typically low level so it's even harder to understand by solely using code review.
+It's better to use a living documentation to understand the service's failure modes, so team can maintain and support te service at-ease. Also it gives more opportunity for experimenting after the step definitions are in place.
 
 ## How to run the example?
 
 
-# When things go down
+## When things go down
 
 
 
