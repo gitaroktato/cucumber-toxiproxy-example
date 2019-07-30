@@ -19,11 +19,13 @@ Feature: Cache availability scenarios for user service
     Then the user with id 'u-12345abde234' and name 'Jack' is returned from 'Redis'
 
   @single
+  @fragile
   Scenario: Write cache connection is restored after Redis master is up
     # This test case should be written differently.
     # Every cached entry should have TTL
     # and application should care about restoring stale state in the background
     Given 'redis-master' is up
+    And we wait a bit
     When user is updated with id 'u-12345abde234' and name 'Joe'
     And we wait a bit
     When user is updated with id 'u-12345abde234' and name 'Joe'

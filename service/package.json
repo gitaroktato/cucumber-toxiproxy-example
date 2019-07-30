@@ -7,6 +7,7 @@
     "cucumber-test": "cucumber-js --tags \"not @fragile\"",
     "cucumber-fragile": "cucumber-js --tags @fragile",
     "cucumber-single": "cucumber-js --tags @single",
+    "cucumber-full": "cucumber-js",
     "test": "mocha",
     "lint": "eslint .",
     "nodemon": "nodemon index.js",
