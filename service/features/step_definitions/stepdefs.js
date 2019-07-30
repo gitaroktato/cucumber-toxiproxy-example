@@ -6,6 +6,7 @@ const mysql = require("mysql");
 const { Given, When, Then, Before, BeforeAll, AfterAll } = require('cucumber');
 // TODO we can create a separate configuration
 // TODO read docker IP from ENV
+const DOCKER_HOST = process.env.DOCKER_HOST || '192.168.99.100';
 const SERVICE_URL = 'http://192.168.99.106:8080';
 const TOXIPROXY_URL = 'http://192.168.99.106:8474';
 const REDIS_BEHIND_PROXY = ["192.168.99.106:6380"];
