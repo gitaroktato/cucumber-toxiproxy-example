@@ -5,7 +5,8 @@ const redis = require("thunk-redis");
 const mysql = require("mysql");
 const { Given, When, Then, Before, BeforeAll, AfterAll } = require('cucumber');
 // TODO we can create a separate configuration
-const SERVICE_URL = 'http://localhost:8080';
+// TODO read docker IP from ENV
+const SERVICE_URL = 'http://192.168.99.106:8080';
 const TOXIPROXY_URL = 'http://192.168.99.106:8474';
 const REDIS_BEHIND_PROXY = ["192.168.99.106:6380"];
 const MYSQL_BEHIND_PROXY = {

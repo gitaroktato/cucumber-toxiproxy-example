@@ -11,5 +11,4 @@ COPY . .
 
 EXPOSE 8080
 USER node
-ENTRYPOINT ["node"]
-CMD ["index.js"]
+CMD ["node", "index.js"]

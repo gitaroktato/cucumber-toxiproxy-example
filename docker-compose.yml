@@ -37,4 +37,4 @@ services:
       - "8080:8080"
     environment:
       - "NODE_ENV=docker"
-    command: ["./wait-for-it.sh", "toxiproxy:3306", "--", "python", "app.py"]
+    command: ["./wait-for-it.sh", "mysql:3306", "--", "node", "index.js"]
