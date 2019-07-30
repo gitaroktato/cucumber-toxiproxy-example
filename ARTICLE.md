@@ -8,12 +8,12 @@ Toxiproxy is a cool programmable proxy made by Shopify for testing purposes. We'
 
 ## Why Cucumber?
 Failure modes are hard to understand, but still take a significant part in our service lifecycle. Often you can only understand failure modes of a specific service by looking at the source code. These implementations are typically low level so it's even harder to understand by solely using code review.
-It's better to use a living documentation to understand the service's failure modes, so team can maintain and support te service at-ease. Also it gives more opportunity for experimenting after the step definitions are in place.
+It's better to use a living documentation to understand the service's failure modes, so team can maintain and support te service at-ease. Also it gives more opportunity for experimenting after the step definitions are in-place (#TODO settled?).
 
 ## How to run the example?
 Go to the [GitHub example][1] and see the `README.md` on how to start the service along all the dependencies.
 
-I suggest looking at `Before` `BeforeAll` `AfterAll` implementations to better understand how step definition is communicating with the Toxpiproxy API.
+I suggest looking at `Before` `BeforeAll` `AfterAll` implementations to better understand how step definition is communicating with the Toxpiproxy API (#TODO concrete methods with links).
 
 ## When things go down
 First thing that we will implement is going to be the case when we can't reach the database.  
