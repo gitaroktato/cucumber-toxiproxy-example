@@ -31,4 +31,4 @@ The user-service will run database patches by default. If this needs to be switc
 ...
 ```
 
-[1]: blob/master/service/app/config/config.json
+[1]: service/app/config/config.json
