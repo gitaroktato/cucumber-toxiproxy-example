@@ -4,9 +4,17 @@ const assert = require('assert');
 const redis = require("thunk-redis");
 const mysql = require("mysql");
 const { Given, When, Then, Before, BeforeAll, AfterAll } = require('cucumber');
-// TODO to configuration
-const SERVICE_URL = 'http://localhost:8080';
-const TOXIPROXY_URL = 'http://192.168.99.106:8474';
+// TODO we can create a separate configuration
+const DOCKER_HOST = new URL(process.env.DOCKER_HOST || 'tcp://192.168.99.100:2376').hostname;
+const SERVICE_URL = `http://${DOCKER_HOST}:8080`;
+const TOXIPROXY_URL = `http://${DOCKER_HOST}:8474`;
+const REDIS_BEHIND_PROXY = [`${DOCKER_HOST}:6380`];
+const MYSQL_BEHIND_PROXY = {
+    host: DOCKER_HOST,
+    port: "3307",
+    user: "root",
+    password: "letmein"
+  };
 const TEST_RECOVERY_INTERVAL = 800;
 const DEFAULT_TIMEOUT_FOR_SERVICES = 5000;
 
@@ -68,13 +76,8 @@ function resetToxiproxy(callback) {
 }
 
 BeforeAll((_, callback) => {
-  this.client = redis.createClient(["192.168.99.106:6380"]);
-  this.mysql = mysql.createConnection({
-    host: "192.168.99.106",
-    port: "3307",
-    user: "root",
-    password: "letmein"
-  });
+  this.redis = redis.createClient(REDIS_BEHIND_PROXY);
+  this.mysql = mysql.createConnection(MYSQL_BEHIND_PROXY);
   this.mysql.connect(callback);
 });
 
@@ -83,7 +86,7 @@ function waitUntilConnectionsRecover(callback) {
 }
 
 Before((_, callback) => {
-  this.client.flushdb()((err) => {
+  this.redis.flushdb()((err) => {
     if (err) {
       return callback(err);
     }
@@ -99,13 +102,13 @@ Before((_, callback) => {
 });
 
 AfterAll((callback) => {
-  this.client.quit()();
+  this.redis.quit()();
   this.mysql.end();
   resetToxiproxy(callback);
 });
 
 Given('user {string} with name {string} is cached', (id, name, callback) => {
-  this.client.hmset(id, 'id', id, 'name', name)(callback);
+  this.redis.hmset(id, 'id', id, 'name', name)(callback);
 });
 
 Given('user {string} with name {string} is stored', (id, name, callback) => {

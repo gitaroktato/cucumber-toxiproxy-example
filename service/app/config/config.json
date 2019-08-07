@@ -22,6 +22,17 @@
     "toxiproxy": {
         "config_id": "toxiproxy"
     },
+    "docker": {
+      "config_id": "docker",
+      "mysql": {
+        "host": "toxiproxy",
+        "port": 3306
+      },
+      "redis": {
+        "hosts": ["toxiproxy:6379", "toxiproxy:16379"]
+      },
+      "initSql": true
+    },
     "config-test": {
       "config_id": "test",
       "mysql": {

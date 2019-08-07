@@ -18,7 +18,6 @@ describe('Initalizing tables', () => {
       dao.initTables(conn, () => {
         chai.assert(conn.query.calledWith('CREATE DATABASE users'));
         chai.assert(conn.query.calledWithMatch(/CREATE TABLE users.user/));
-        chai.assert(conn.query.calledWithMatch(/INSERT INTO users.user/));
         done();
       });
   });

@@ -1,50 +1,34 @@
-# Building resilient microservices using Toxiproxy and Cucumber
+# Examples for the article _"Designing resilient microservices with Toxiproxy and Cucumber"_
 
-# Goal
-## Local / Staging
-- Easily reproducing it locally only with Docker
-- Able to integrate with our container orchestrators
-- Living documentation of failure scenarios for every service that helps team to understand failure modes
-- Better control and design for failure modes
-
-# Test lifecycle
-1. start service in docker
-1. Execute Cucumber tests
-1. Teardown
-
-## Integration points
-caching -> DB
-aggregate service (BFF) -> service or defaults
-
-# Executing manually
-Create proxy
+# How to star the examples?
+All you need to do is just bringing everything up in Docker.
 ```
-/go/bin/toxiproxy-cli create redis-public --listen 0.0.0.0:6379 --upstream redis:6379
-/go/bin/toxiproxy-cli toxic add redis-public -t latency -a latency=1000
+docker-compose up -d
+```
+Check if the application is started properly, by running `docker-compose logs user-service`. If not, you might need to bring it up again by executing `docker-compose up -d user-service`.
+
+After the application is up-and-running you can run the Cucumber tests with
+```
+cd service
+npm run cucumber-test
 ```
 
-Connect to the proxy with `redis-cli`
+The user-service will run database patches by default. If this needs to be switched off, you need to look at [config.json][1] and change the following section to **false**.
+
 ```
-docker-compose exec redis redis-cli -h toxiproxy
+...
+"docker": {
+    "config_id": "docker",
+    "mysql": {
+    "host": "toxiproxy",
+    "port": 3306
+    },
+    "redis": {
+    "hosts": ["toxiproxy:6379", "toxiproxy:16379"]
+    },
+    "initSql": false
+}
+...
 ```
 
-# Draft
-- Don't run the service and the tests in the same process
-- Benefits of testing with the whole network stack
-
-
-## Step 1 - Pooling MySQL
-https://www.npmjs.com/package/mysql#server-disconnects
-
-
-# Conclusion
-This method allows fine-grained failure scenarios that are clear for everyone. Assumptions made locally can be verified with another environment by reconfiguring ToxyiProxy to see if they still stand.
-
-# Disclaimer
-Node.js code should not serve as an example on how to write clean code in this language.
-
-# References
-https://www.gremlin.com/chaos-monkey/chaos-monkey-alternatives/
-https://github.com/shopify/toxiproxy#clients
-https://github.com/trekawek/toxiproxy-java
-https://cucumber.io/docs/guides/10-minute-tutorial/
+[1]: blob/master/service/app/config/config.json
