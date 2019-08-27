@@ -10,8 +10,14 @@ Toxiproxy is a cool programmable proxy made by Shopify for testing purposes. We'
 Failure modes are hard to understand, but still take a significant part in our service lifecycle. Often you can only understand failure modes of a specific service by looking at the source code. These implementations are typically low level so it's even harder to understand by solely using code review.
 It's better to use a living documentation to understand the service's failure modes, so team can maintain and support te service at-ease. Also it gives more opportunity for experimenting after the step definitions are in-place (#TODO settled?).
 
+## What are we going to build?
+The diagram below shows an overview of the container connections in the example's [docker compose][2] file. The application is connecting to a cache cluster and a database instance provided by redis master/slave and MySQL. It's doing it indirectly through Toxiproxy, which offers a REST API for controlling the network characteristics. So tests will be able to change the network connectivity between the application and each one of it's dependency separately. I'm going to use Cucumber for giving my test scenarios a nice readable format and declare our .. 
+![services-overview][services-overview]
+
+### Toxiporxy API
+
 ## How to run the example?
-Go to the [GitHub example][1] and see the `README.md` on how to start the service along all the dependencies.
+Go to the [GitHub example][1] and see the `README.md` on how to start the service along all the dependencies. It also contains the commands for running the Cucumber tests.
 
 I suggest looking at `Before` `BeforeAll` `AfterAll` implementations to better understand how step definition is communicating with the Toxpiproxy API (#TODO concrete methods with links).
 
@@ -34,11 +40,15 @@ Seems like it's relatively easy to do if we
 
 
 ## Drawbacks
-Serivces recover after a certain period. That period can be different on each environment ...
+Serivces recover after a certain period. That period can be different on each environment ... (#TODO)
 It's not really a good idea to connect failure detection with some kind-of action if your traffic doesn't have stable characteristics. 
 
 ## Conclusion
 ### Why can't I just use integration tests and mocks?
 Drives are just a black box. They contain a lot of surprises you wouldn't expect. Creating a programmable mock involves a lot of assumptions on how the driver is going to behave.
 
+### What's with toxiproxy-node-client?
+
 [1]: https://github.com/gitaroktato/cucumber-toxiproxy-example
+[2]: https://github.com/gitaroktato/cucumber-toxiproxy-example/blob/master/docker-compose.yml
+[services-overview]: docs/services-overview.png
