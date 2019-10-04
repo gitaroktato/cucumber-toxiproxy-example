@@ -97,7 +97,7 @@ Feature: Cache availability scenarios for user service
     Then the user with id 'u-12345abde234' is returned from 'Redis'
 ```
 
-This was the point, when things became interesting. If we intented to run redis in just a simple [master/slave][redis-cluster] mode, without using sentinels or a cluster with shards, it's impossible to failover to the read-only slaves with the traditional node.js driver. I had to look for a smarter client and finally ended up using [thunk-redis][thunk-redis]. Fortunately the two APIs are almost identical and I have the option to define both the master and the slave IP addresses at connection initialization. You can see list of cliets for all programming languages in the [official website][redis-clients].
+This is the point, when things become interesting. If we intend to run Redis in a simple [master/slave][redis-cluster] mode - without using sentinels or a cluster with shards - it's impossible to failover to the read-only slaves with the traditional Node JS driver. I had to look for a smarter client and finally ended up using [thunk-redis][thunk-redis]. Fortunately, the two APIs are almost identical and I have the option to define both the master and the slave IP addresses at connection initialization. You can see list of cliets for all programming languages in the [official website][redis-clients].
 
 ```
 function connect({
@@ -130,39 +130,78 @@ function connect({
 }
 ```
 
-How should we handle any error with cache writes? The next step is to carve out two additional scenarios for these use cases.  
+How should we handle any error with cache writes? The next step is to carve out two more scenarios for these use cases.  
 
 ```
 Feature: Cache availability scenarios for user service
-  User service should survive all possible failure scenarios
+  ...
 
   Background:
     Given user 'u-12345abde234' with name 'Jack' is cached
     And user 'u-12345abde234' with name 'Jack' is stored
-...
+  ...
   Scenario: Write cache fails without Redis master
     Given 'redis-master' is down
     When user is updated with id 'u-12345abde234' and name 'Joe'
     And user 'u-12345abde234' is requested
     Then the user with id 'u-12345abde234' and name 'Jack' is returned from 'Redis'
-
-  @single
-  @fragile
-  Scenario: Write cache connection is restored after Redis master is up
-    # This test case should be written differently.
-    # Every cached entry should have TTL
-    # and application should care about restoring stale state in the background
-    Given 'redis-master' is up
-    And we wait a bit
-    When user is updated with id 'u-12345abde234' and name 'Joe'
-    And we wait a bit
-    When user is updated with id 'u-12345abde234' and name 'Joe'
-    And user 'u-12345abde234' is requested
-    # Should be cached now
-    And user 'u-12345abde234' is requested
-    Then the user with id 'u-12345abde234' and name 'Joe' is returned from 'Redis'
+...
 ...
 ```
+The first scenario is expressing that the application should return stale results from the read-only cache after write failure. Be aware of that this might be an unacceptable in your case. Even though writing the cache fails, writes should still reach the database. This means that after cache eviction we must get back the up-to-date user from MySQL.
+
+The next scenario is dealing with the case when Redis master gets back to business.
+
+```
+  ...
+  Scenario: Write cache connection is restored after Redis master is up
+    Given 'redis-master' is down
+    And 'redis-master' is up
+    When user is updated with id 'u-12345abde234' and name 'Joe'
+    And user 'u-12345abde234' is requested
+    Then the user with id 'u-12345abde234' and name 'Joe' is returned from 'Redis'
+  ...
+```
+
+Let's start implementing this in our application. The good news is, that `thunk-redis` connects to the slave automatically, when master is not available. But unfortunately it's not the case when master becomes available again. The driver will send the `READONLY` error code every time, when write failed to the slave node. But it won't automatically reconnect to master. We have to detect these failures and initiate the reconnection. This is how it looks.
+
+```
+function reconnectOnReadOnlyError(client, err) {
+  if (!err.code || err.code !== 'READONLY') {
+    return;
+  }
+  setTimeout(() => {
+    reconnect(client);
+  }, client.reconnectToMasterMs);
+  console.debug("Reconnecting to master after %d ms", client.reconnectToMasterMs);
+}
+...
+function storeUser(client, user) {
+  client.hmset(user.id, 'id', user.id, 'name', user.name)(err => {
+    if (err) {
+      console.error("Storing user in REDIS failed", err);
+      reconnectOnReadOnlyError(client, err);
+    }
+  });
+}
+...
+function evictUser(client, userId) {
+  client.del(userId)(err => {
+    if (err) {
+      console.error("Deleting user in REDIS failed", err);
+      reconnectOnReadOnlyError(client, err);
+    }
+  });
+}
+```
+Have you noticed the issue in the code above? We tightly coupled the detection of read-only mode with the cache API calls. What's the problem with that? If there's no traffic, the failure won't be detected and recovery won't be initiated. Even the amount of retries are depending on the calls that are trying to write to the cache (just a small hint: one reconnection attempt is often not enough). 
+
+OK, but is our application able to pass the newly written test-case? 
+
+# Timeouts
+...
+Conection represented in your code, test TCP by sending packet ...
+
 
 (#TODO move this to the proper place)
 ```
@@ -207,3 +246,6 @@ Drives are just a black box. They contain a lot of surprises you wouldn't expect
 [redis-cluster]: https://redis.io/topics/replication
 [thunk-redis]: https://github.com/thunks/thunk-redis
 [redis-clients]: https://redis.io/clients
+
+
+(#TODO show file names beside example code)
