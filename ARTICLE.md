@@ -196,7 +196,32 @@ function evictUser(client, userId) {
 ```
 Have you noticed the issue in the code above? We tightly coupled the detection of read-only mode with the cache API calls. What's the problem with that? If there's no traffic, the failure won't be detected and recovery won't be initiated. Even the amount of retries are depending on the calls that are trying to write to the cache (just a small hint: one reconnection attempt is often not enough). 
 
-OK, but is our application able to pass the newly written test-case? 
+OK, but is our application able to pass the newly written test-case? Unfortunately not on the first attemp. The application needs to detect multiple failed operations and requires some time to recover. The final test-case scenario needed a rewrite multiple time. After all the effort it still looks ugly and it's format hurts readability:
+
+```
+  ...
+  @fragile
+  Scenario: Write cache connection is restored after Redis master is up
+    ...
+    Given 'redis-master' is up
+    And we wait a bit
+    When user is updated with id 'u-12345abde234' and name 'Joe'
+    And we wait a bit
+    When user is updated with id 'u-12345abde234' and name 'Joe'
+    And user 'u-12345abde234' is requested
+    # Should be cached now
+    And user 'u-12345abde234' is requested
+    Then the user with id 'u-12345abde234' and name 'Joe' is returned from 'Redis'
+    ...
+```
+Yikes! This is the point where we need to rething what we're doing. The description of the failure modes should be easy to consume for a human. I will leave it to the readers to fix the test case and the application (probably I will do it also in an upcoming article). Here are a few guidelines on how it can be done:
+
+- Failure detection should be done periodically, like I did with timeouts in the next section
+- The scenario should have a defined interval, in which we're expecting the correct result to arrive.
+
+For now I'll exclude this scenario with the `@fragile` annotation. I think it's a good practice overall to separate fragile tests. You can choose not to break the build, but still generate a test report if one of these fails until team comes up with a stabilized solution.
+
+The scenario above can be run with `cucumber-js --tags @fragile`. 
 
 # Timeouts
 ...
