@@ -14,7 +14,6 @@ It's better to use a living documentation to understand the service's failure mo
 The diagram shows an overview of the container connections in the example's [docker compose][2] file. The application connects to a cache cluster and a database instance provided by redis master/slave and MySQL. It's doing it indirectly through Toxiproxy, which offers a REST API for controlling the network characteristics. Tests will be able to change the network connectivity between the application and each one of its dependency separately. Cucumber gives the test scenarios a nice readable format and allows declaring our application's failure modes in feature files.
 ![services-overview][services-overview]
 
-
 ## How to run the example?
 Go to the [GitHub example][1] and see the `README.md` on how to start the service along all the dependencies. It also contains the commands for running the Cucumber tests.
 
@@ -316,15 +315,18 @@ After implementing all these not-so-straightforward library extensions, finally 
 
 # Conclusion
 
-### Why can't I just use integration tests and mocks?
+## Why can't I just use integration tests and mocks?
 Drives are just a black box. They contain a lot of surprises you wouldn't expect. Creating a programmable mock involves a lot of assumptions on how the driver is going to behave. The approach above gives you space for a lot of exploration. It's required to fully understand your driver's limitations on handling connection failures.
 
-### What's with toxiproxy-node-client?
-Unfortunately using [toxiproxy-node-client][toxiproxy-node-client] 
+## What's with toxiproxy-node-client?
+Unfortunately using [toxiproxy-node-client][toxiproxy-node-client] didn't end up very well, so I decided implementing my own client call in `Before` `BeforeAll` `AfterAll`. 
+
+## Why don't we use circuit breakers?
+Good point! I plan to continute in another article showing how the issues above can be solved with them.
 
 ## Drawbacks
-Serivces recover after a certain period. That period can be different on each environment ... (#TODO)
-It's not really a good idea to connect failure detection with some kind-of action if your traffic doesn't have stable characteristics. 
+* Serivces recover after a certain period. That period can be different on each environment. This needs careful fine-tuning of all timeout & grace period related configurations.
+* It's not really a good idea to connect failure detection with some kind-of action if your traffic doesn't have stable characteristics. For instance detecting write failures should not be tightly bound to write attempts unless there's a decent traffic for write attempts.
 
 
 [1]: https://github.com/gitaroktato/cucumber-toxiproxy-example
