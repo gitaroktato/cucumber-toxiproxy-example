@@ -1,7 +1,7 @@
-# Designing resilient microservices with Toxiproxy and Cucumber
+# Designing fault tolerant microservices with Toxiproxy and Cucumber
 
-## Thinking about resiliency from day 0
-Resiliency - alongside with security and other traits - is hard to factor-in after the service is already built. It's created by making careful design decisions starting at the same time your service was born. _"... but what happens when the database isn't there? What happens if all connections time out?"_ - you might ask. These are all valid questions and you better prepare for these situations before your service goes live.
+## Thinking about fault tolerance from day 0
+Fault tolerance - alongside with security and other traits - is hard to factor-in after the service is already built. It's created by making careful design decisions starting at the same time your service was born. _"... but what happens when the database isn't there? What happens if all connections time out?"_ - you might ask. These are all valid questions and you better prepare for these situations before your service goes live.
 
 ## About Toxiproxy
 Toxiproxy is a cool programmable proxy made by Shopify for testing purposes. We're going to use it to predefine network characteristics in our scenarios which are going to describe our failure modes.
@@ -196,7 +196,7 @@ function evictUser(client, userId) {
 ```
 Have you noticed the issue in the code above? We tightly coupled the detection of read-only mode with the cache API calls. What's the problem with that? If there's no traffic, the failure won't be detected and recovery won't be initiated. Even the amount of retries are depending on the calls that are trying to write to the cache (just a small hint: one reconnection attempt is often not enough). 
 
-OK, but is our application able to pass the newly written test-case? Unfortunately not on the first attemp. The application needs to detect multiple failed operations and requires some time to recover. The final test-case scenario needed a rewrite multiple time. After all the effort it still looks ugly and it's format hurts readability:
+OK, but is our application able to pass the newly written scenario? Unfortunately not on the first attemp. The application needs to detect multiple failed operations and requires some time to recover. The final scenario was rewritten multiple times. After all the effort it still looks ugly and it's format hurts your eyes:
 
 ```
   ...
@@ -216,52 +216,116 @@ OK, but is our application able to pass the newly written test-case? Unfortunate
 ```
 Yikes! This is the point where we need to rething what we're doing. The description of the failure modes should be easy to consume for a human. I will leave it to the readers to fix the test case and the application (probably I will do it also in an upcoming article). Here are a few guidelines on how it can be done:
 
-- Failure detection should be done periodically, like I did with timeouts in the next section
+- Failure detection should be done periodically, similart to how timeout detection is implemented in the next section
 - The scenario should have a defined interval, in which we're expecting the correct result to arrive.
 
-For now I'll exclude this scenario with the `@fragile` annotation. I think it's a good practice overall to separate fragile tests. You can choose not to break the build, but still generate a test report if one of these fails until team comes up with a stabilized solution.
+For now I'll exclude this scenario with the `@fragile` annotation. I think it's a good practice overall to separate fragile tests. You can choose not to break the build, but still generate a test report if one of these fails until team comes up with a stable solution.
 
 The scenario above can be run with `cucumber-js --tags @fragile`. 
 
 # Timeouts
-...
-Conection represented in your code, test TCP by sending packet ...
-
-
-(#TODO move this to the proper place)
+We've got plenty of scenarios working with one type of [toxic][toxiproxy-toxics]. It's time to experiment with other ones as well. Let's look at some failures, when timeout occurs.
 ```
-app.get('/users/:userId', function (req, res) {
-    const userId = req.params.userId;
-    // get from cache
-    cache.getUser(app.cacheClient, userId, (err, user) => {
-      // Let's ignore error and just try to continue.. What could go wrong?
+Feature: Cache availability scenarios for user service
+...
+  Scenario: Redis master/slave time out
+    Given 'redis-master' times out
+    And 'redis-slave' times out
+    When user 'u-12345abde234' is requested
+    Then the user with id 'u-12345abde234' is returned from 'MySQL'
+```
+
+Unfortunately this is the point, where flaws of `thunk-redis` implementation are bubbling to the surface. Our application is waiting forever until finally giving up and denying every request towards our Redis connections. I had to introduce a decent connection validation logic to be able to deal with timeouts effectively. In-brief this is what every client library *ought to* do to ensure that all the connections represented inside are ready to recieve requests:
+
+* Add a timeout interval as an additional parameter for every blocking call.
+* Check periodically if established connection are still alive.
+
+Let's start with intoducing a wrapper method which allows a *timeout interval* parameter:
+
+```
+...
+function callWithTimeout(method, timeout, callback) {
+  let timeoutTriggered = false;
+  const afterTimeout = setTimeout(() => {
+    timeoutTriggered = true;
+    callback(new Error(`Execution timed out after ${timeout}ms`));
+  }, timeout);
+  method((...args) => {
+    clearTimeout(afterTimeout);
+    // We avoid sending callbacks multiple times.
+    if (!timeoutTriggered) {
+      return callback(...args);
+    }
+  });
+}
+...
+```
+
+Good news is that JavaScript allows us to define a generic method to wrap any kind-of function. That's the method I'm going to use to implement our connection validation logic for Redis connections:
+
+```
+function reconnect(client) {
+  client.clientEnd();
+  client.clientConnect();
+}
+...
+function initiateScheduledPing(client) {
+  setInterval(() => {
+    callWithTimeout(client.ping(), client.pingTimeoutMs, (err) => {
       if (err) {
-        console.error("REDIS error, when getting user - ", err);
-      }
-      // Check if result has something.
-      // thunk-redis returns empty object if key doesn't exist.
-      if (user && user.id) {
-        console.debug("Loaded from REDIS - %o", user);
-        res.set("X-Data-Source", "cache");
-        res.json(user);
-      } else {
-        // get from database
-        ...
+        console.error("Ping failed, reconnecting:", err);
+        reconnect(client);
       }
     });
-});
+  }, client.pingIntervalMs);
+}
 ```
+
+Notice, that `client.ping()` is just a "factory method" just passing the function to `callWithTimeout`. That's a special dialect coming from `thunk-redis`. 
+
+Initiating Redis connections will pass configuration parameters and kick-off the validation of the pool:
+
+```
+function connect(
+  {
+    ...
+    pingIntervalMs,
+    pingTimeoutMs,
+    ...
+  },
+  callback) {
+  ...
+  client.pingIntervalMs = pingIntervalMs;
+  client.pingTimeoutMs = pingTimeoutMs;
+  ...
+  initiateScheduledPing(client);
+  ...
+}
+
+```
+
+Every call to `thunk-redis` should be wrapped with `callWithTimeout`, so this is how to get an user with predefined timeout interval:
+
+```
+function getUser(client, userId, callback) {
+  callWithTimeout(client.hgetall(userId), client.callTimeoutMs, callback);
+}
+```
+
+After implementing all these not-so-straightforward library extensions, finally our scenario will pass.
+
+# Conclusion
+
+### Why can't I just use integration tests and mocks?
+Drives are just a black box. They contain a lot of surprises you wouldn't expect. Creating a programmable mock involves a lot of assumptions on how the driver is going to behave. The approach above gives you space for a lot of exploration. It's required to fully understand your driver's limitations on handling connection failures.
+
+### What's with toxiproxy-node-client?
+Unfortunately using [toxiproxy-node-client][toxiproxy-node-client] 
 
 ## Drawbacks
 Serivces recover after a certain period. That period can be different on each environment ... (#TODO)
 It's not really a good idea to connect failure detection with some kind-of action if your traffic doesn't have stable characteristics. 
 
-## Conclusion
-### Why can't I just use integration tests and mocks?
-Drives are just a black box. They contain a lot of surprises you wouldn't expect. Creating a programmable mock involves a lot of assumptions on how the driver is going to behave.
-
-### What's with toxiproxy-node-client?
-(#TODO)
 
 [1]: https://github.com/gitaroktato/cucumber-toxiproxy-example
 [2]: https://github.com/gitaroktato/cucumber-toxiproxy-example/blob/master/docker-compose.yml
@@ -271,6 +335,7 @@ Drives are just a black box. They contain a lot of surprises you wouldn't expect
 [redis-cluster]: https://redis.io/topics/replication
 [thunk-redis]: https://github.com/thunks/thunk-redis
 [redis-clients]: https://redis.io/clients
-
+[toxiproxy-toxics]: https://github.com/shopify/toxiproxy#toxics
+[toxiproxy-node-client]: https://github.com/ihsw/toxiproxy-node-client
 
 (#TODO show file names beside example code)
