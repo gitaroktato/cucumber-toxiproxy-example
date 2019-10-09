@@ -8,10 +8,11 @@
 [/] cache expiration (timeouts?)
 [/] Cucumber tags
 [ ] install from SQL file not hardcoded inline SQL (Docker?)
-[ ] Fix docker volumes
+[/] Fix docker volumes
 [?] domain
 
 # Part 2
+[ ] Test cases with grace period
 [ ] Add multistage node to Dockerfile
 [ ] aggregate service
 [ ] How do we deal with startup? Without MySQL but with Redis?
