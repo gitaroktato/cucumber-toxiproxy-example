@@ -1,4 +1,4 @@
-# Examples for the article _"Designing resilient microservices with Toxiproxy and Cucumber"_
+# Examples for the article _"Designing fault-tolerant microservices with Toxiproxy and Cucumber"_
 
 # How to start the examples?
 All you need to do is just bringing everything up in Docker.
